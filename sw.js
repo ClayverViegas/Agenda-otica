@@ -39,7 +39,7 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE).then(c => c.put(req, copia));
         }
         return resp;
-      }).catch(() => cache || caches.match('./agenda.html'));
+      }).catch(() => cache || caches.match('./index.html'));
 
       return cache || rede;
     })
@@ -58,7 +58,7 @@ self.addEventListener('message', e => {
       badge: './icone-192.png',
       vibrate: [180, 80, 180],
       requireInteraction: true,
-      data: { url: './agenda.html' }
+      data: { url: './index.html' }
     });
   }
 });
@@ -68,7 +68,7 @@ self.addEventListener('notificationclick', e => {
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(lista => {
       for (const c of lista) if ('focus' in c) return c.focus();
-      return clients.openWindow('./agenda.html');
+      return clients.openWindow('./index.html');
     })
   );
 });
