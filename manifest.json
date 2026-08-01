@@ -15,7 +15,7 @@
     { "src": "./icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
   ],
   "shortcuts": [
-    { "name": "Novo agendamento", "url": "./agenda.html?acao=novo", "icons": [{ "src": "./icone-192.png", "sizes": "192x192" }] },
-    { "name": "Relatório", "url": "./agenda.html?acao=relatorio" }
+    { "name": "Novo agendamento", "url": "./index.html?acao=novo", "icons": [{ "src": "./icone-192.png", "sizes": "192x192" }] },
+    { "name": "Relatório", "url": "./index.html?acao=relatorio" }
   ]
 }
