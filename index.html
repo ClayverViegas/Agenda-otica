@@ -117,6 +117,7 @@ textarea.campo{min-height:74px;resize:vertical}
 .chip{display:inline-flex;align-items:center;gap:7px;background:#EDE7FB;color:var(--roxo);padding:8px 12px;border-radius:999px;
   font-size:13.5px;font-weight:650;margin:0 6px 6px 0}
 .chip button{color:var(--roxo-2);font-size:16px;line-height:1}
+.chip button.preco{font-size:13.5px;font-weight:700;color:var(--roxo);background:#fff;padding:3px 9px;border-radius:999px}
 .total{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:15px}
 .total b{font-size:19px}
 .sug{background:#fff;border:1px solid var(--linha);border-radius:12px;margin-top:6px;overflow:hidden;box-shadow:var(--sombra);
@@ -1053,7 +1054,8 @@ function sugServico(){
   const q=document.getElementById('agServ').value.trim().toLowerCase(),box=document.getElementById('sugS');
   const l=db.servicos.filter(s=>s.nome.toLowerCase().includes(q)).slice(0,7);
   let h=l.map(s=>`<div onclick="addServico('${s.id}')">${esc(s.nome)}${s.sessoes>1?` <span style="color:var(--ambar)">${s.sessoes}x</span>`:''} · <span style="color:var(--roxo)">${moeda(s.preco)}</span></div>`).join('');
-  if(q&&!l.some(s=>s.nome.toLowerCase()===q))h+=`<div class="add" onclick="addServicoAvulso()">+ Adicionar “${esc(document.getElementById('agServ').value.trim())}”</div>`;
+  if(q&&!l.some(s=>s.nome.toLowerCase()===q))h+=`<div class="add" onclick="addServicoAvulso()">+ Adicionar “${esc(document.getElementById('agServ').value.trim())}” com valor</div>`;
+  if(!q)h+=`<div class="add" onclick="addServicoAvulso()">+ Serviço avulso (nome e valor livres)</div>`;
   box.innerHTML=h?'<div class="sug">'+h+'</div>':'';
 }
 function addServico(id){
@@ -1063,14 +1065,22 @@ function addServico(id){
   document.getElementById('agServ').value='';document.getElementById('sugS').innerHTML='';chips();calcFim();
 }
 function addServicoAvulso(){
-  const nome=document.getElementById('agServ').value.trim();if(!nome)return;
-  servSel.push({nome,preco:numero(prompt('Preço de "'+nome+'" (R$):','0'))});
+  let nome=document.getElementById('agServ').value.trim();
+  if(!nome){nome=(prompt('Nome do serviço:','')||'').trim();if(!nome)return}
+  const v=prompt('Valor de "'+nome+'" (R$):','0');if(v===null)return;
+  servSel.push({nome,preco:numero(v)});
   document.getElementById('agServ').value='';document.getElementById('sugS').innerHTML='';chips();
 }
 function chips(){
   document.getElementById('chipsServ').innerHTML=servSel.map((s,i)=>
-    `<span class="chip">${esc(s.nome)} <b class="num">${moeda(s.preco)}</b><button onclick="remServico(${i})">×</button></span>`).join('');
+    `<span class="chip">${esc(s.nome)} <button class="preco num" onclick="editarPreco(${i})">${moeda(s.preco)} ✎</button><button onclick="remServico(${i})">×</button></span>`).join('')
+    +(servSel.length?'<p class="dica">Toque no valor para alterar o preço só neste agendamento.</p>':'');
   document.getElementById('agTotal').textContent=moeda(servSel.reduce((t,s)=>t+(Number(s.preco)||0),0));
+}
+function editarPreco(i){
+  const v=prompt('Valor de "'+servSel[i].nome+'" neste agendamento (R$):',String(servSel[i].preco).replace('.',','));
+  if(v===null)return;
+  servSel[i].preco=numero(v);chips();
 }
 function remServico(i){servSel.splice(i,1);chips()}
 function montarAg(data){
@@ -1192,9 +1202,15 @@ function itensComanda(){
   document.getElementById('cmItens').innerHTML=c.itens.length?c.itens.map((it,i)=>
     `<div class="item"><div class="info"><b>${esc(it.nome)}</b><span>${it.tipo==='produto'?'Produto':'Serviço'} · ${moeda(it.preco)} un.</span></div>
       <div class="stepper"><button onclick="qtdItem(${i},-1)">−</button><b class="num">${it.qtd}</b><button onclick="qtdItem(${i},1)">+</button></div>
-      <span class="val num">${moeda(it.preco*it.qtd)}</span></div>`).join('')
+      <button class="val num" onclick="editarPrecoItem(${i})">${moeda(it.preco*it.qtd)} ✎</button></div>`).join('')
     :'<p class="dica">Nenhum item na comanda ainda.</p>';
   totalComanda();
+}
+function editarPrecoItem(i){
+  const c=db.comandas.find(x=>x.id===cmdAtual);
+  const v=prompt('Valor unitário de "'+c.itens[i].nome+'" (R$):',String(c.itens[i].preco).replace('.',','));
+  if(v===null)return;
+  c.itens[i].preco=numero(v);salvar();itensComanda();
 }
 function qtdItem(i,n){
   const c=db.comandas.find(x=>x.id===cmdAtual);

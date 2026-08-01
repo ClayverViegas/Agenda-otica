@@ -2,7 +2,7 @@
    Estratégia: cache-first para os arquivos do app, com atualização em segundo plano.
    Ao publicar uma nova versão do index.html, troque o número do CACHE abaixo. */
 
-const CACHE = 'agenda-v5';
+const CACHE = 'agenda-v6';
 const ARQUIVOS = [
   './',
   './index.html',
