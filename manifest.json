@@ -2,7 +2,7 @@
   "name": "Agenda de Atendimento",
   "short_name": "Agenda",
   "description": "Agenda de atendimentos com clientes, serviços, relatórios e lembretes. Funciona offline.",
-  "start_url": "./agenda.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
