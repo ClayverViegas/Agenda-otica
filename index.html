@@ -145,6 +145,16 @@ textarea.campo{min-height:74px;resize:vertical}
 .b-cc{background:#F1EFF5;color:var(--cinza)}
 .b-pd{background:#FDECEF;color:var(--vermelho)}
 .aviso{background:#FFF7E8;border:1px solid #F5E3BE;color:#8A5A00;padding:11px 13px;border-radius:12px;font-size:13px;margin-bottom:12px}
+.modal{position:fixed;inset:0;z-index:150;background:rgba(27,21,38,.45);display:none;align-items:center;justify-content:center;padding:22px}
+.modal.on{display:flex}
+.modal-cx{background:var(--card);border-radius:18px;padding:18px;width:100%;max-width:400px;box-shadow:0 12px 40px rgba(27,21,38,.3)}
+.modal-cx>b{font-size:17px;font-weight:700;letter-spacing:-.02em}
+.modal-btns{display:flex;gap:10px;margin-top:6px}
+.modal-btns .btn{flex:1;padding:13px}
+.campo-moeda{display:flex;align-items:center;background:#F2F0F7;border:1px solid transparent;border-radius:var(--r);padding:0 14px}
+.campo-moeda:focus-within{border-color:var(--roxo-3);background:#fff}
+.campo-moeda span{color:var(--cinza);font-weight:650;margin-right:8px}
+.campo-moeda input{flex:1;background:none;border:none;outline:none;padding:13px 0;font-size:19px;font-weight:700;text-align:right}
 .toast{position:fixed;left:50%;bottom:calc(96px + var(--safe-b));transform:translate(-50%,20px);background:var(--tinta);color:#fff;
   padding:12px 18px;border-radius:999px;font-size:14px;font-weight:600;z-index:200;opacity:0;pointer-events:none;
   transition:.25s;max-width:88vw;text-align:center}
@@ -289,7 +299,7 @@ textarea.campo{min-height:74px;resize:vertical}
     <button class="txt-btn" style="width:100%;text-align:center;margin-top:16px" onclick="maisCampos()" id="btnMais">Mais campos (observação, custos…)</button>
     <div id="extra" style="display:none">
       <label class="rot">Observação</label><textarea class="campo" id="agObs"></textarea>
-      <label class="rot">Custos do serviço (R$)</label><input class="campo num" id="agCusto" inputmode="decimal" placeholder="0,00">
+      <label class="rot">Custos do serviço (R$)</label><input class="campo num" id="agCusto" data-moeda inputmode="decimal" placeholder="0,00">
       <label class="rot">Lembrete</label>
       <select class="campo" id="agLemb">
         <option value="">Padrão das configurações</option><option value="0">Sem lembrete</option>
@@ -386,7 +396,7 @@ textarea.campo{min-height:74px;resize:vertical}
     <div id="sugCm"></div>
     <div id="cmItens" style="margin-top:12px"></div>
     <div class="linha2" style="margin-top:6px">
-      <div><label class="rot">Desconto (R$)</label><input class="campo num" id="cmDesc" inputmode="decimal" placeholder="0,00" oninput="totalComanda()"></div>
+      <div><label class="rot">Desconto (R$)</label><input class="campo num" id="cmDesc" data-moeda inputmode="decimal" placeholder="0,00" oninput="totalComanda()"></div>
       <div><label class="rot">Forma de pagamento</label>
         <select class="campo" id="cmForma">
           <option value="dinheiro">Dinheiro</option><option value="pix">Pix</option><option value="debito">Débito</option>
@@ -475,8 +485,8 @@ textarea.campo{min-height:74px;resize:vertical}
   <div class="folha-corpo">
     <label class="rot">Nome</label><input class="campo" id="sNome">
     <div class="linha2">
-      <div><label class="rot">Preço (R$)</label><input class="campo num" id="sPreco" inputmode="decimal" placeholder="0,00"></div>
-      <div><label class="rot">Custo (R$)</label><input class="campo num" id="sCusto" inputmode="decimal" placeholder="0,00"></div>
+      <div><label class="rot">Preço (R$)</label><input class="campo num" id="sPreco" data-moeda inputmode="decimal" placeholder="0,00"></div>
+      <div><label class="rot">Custo (R$)</label><input class="campo num" id="sCusto" data-moeda inputmode="decimal" placeholder="0,00"></div>
     </div>
     <label class="rot">Duração padrão</label>
     <select class="campo" id="sDur">
@@ -507,8 +517,8 @@ textarea.campo{min-height:74px;resize:vertical}
   <div class="folha-corpo">
     <label class="rot">Nome</label><input class="campo" id="pNome">
     <div class="linha2">
-      <div><label class="rot">Preço de venda</label><input class="campo num" id="pPreco" inputmode="decimal" placeholder="0,00"></div>
-      <div><label class="rot">Custo</label><input class="campo num" id="pCusto" inputmode="decimal" placeholder="0,00"></div>
+      <div><label class="rot">Preço de venda</label><input class="campo num" id="pPreco" data-moeda inputmode="decimal" placeholder="0,00"></div>
+      <div><label class="rot">Custo</label><input class="campo num" id="pCusto" data-moeda inputmode="decimal" placeholder="0,00"></div>
     </div>
     <div class="linha2">
       <div><label class="rot">Estoque atual</label><input class="campo num" type="number" id="pEstoque" value="0"></div>
@@ -534,7 +544,7 @@ textarea.campo{min-height:74px;resize:vertical}
   <div class="folha-corpo">
     <label class="rot">Descrição</label><input class="campo" id="dDesc">
     <div class="linha2">
-      <div><label class="rot">Valor (R$)</label><input class="campo num" id="dValor" inputmode="decimal" placeholder="0,00"></div>
+      <div><label class="rot">Valor (R$)</label><input class="campo num" id="dValor" data-moeda inputmode="decimal" placeholder="0,00"></div>
       <div><label class="rot">Data</label><input type="date" class="campo num" id="dData"></div>
     </div>
     <label class="rot">Categoria</label>
@@ -769,6 +779,21 @@ textarea.campo{min-height:74px;resize:vertical}
   </div>
 </div>
 
+<!-- MODAL DE VALOR -->
+<div class="modal" id="fValor">
+  <div class="modal-cx">
+    <b id="mvTitulo">Valor</b>
+    <div id="mvAreaNome"><label class="rot" style="margin-top:10px">Nome do serviço</label>
+      <input class="campo" id="mvNome" placeholder="Ex.: Atendimento optométrico"></div>
+    <label class="rot">Valor</label>
+    <div class="campo-moeda"><span>R$</span><input class="campo num" id="mvValor" data-moeda inputmode="numeric" placeholder="0,00"></div>
+    <div class="modal-btns">
+      <button class="btn btn-s" onclick="fecharValor(false)">Cancelar</button>
+      <button class="btn btn-p" onclick="fecharValor(true)">Confirmar</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -801,13 +826,54 @@ const brCurta=s=>s.split('-').reverse().join('/');
 const min=h=>{const[a,b]=String(h).split(':').map(Number);return a*60+b};
 const hhmm=m=>{m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
 const moeda=v=>'R$ '+(Number(v)||0).toFixed(2).replace('.',',');
-const numero=v=>Number(String(v==null?'':v).replace(/\./g,'').replace(',','.'))||0;
+const numero=v=>{
+  let t=String(v==null?'':v).replace(/[^\d,.-]/g,'');
+  if(t.includes(',')) t=t.replace(/\./g,'').replace(',','.');
+  return Number(t)||0;
+};
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const soDigitos=s=>String(s||'').replace(/\D/g,'');
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('on'),2600)}
 function abrir(id){document.getElementById(id).classList.add('on');fab(false)}
 function fechar(id){document.getElementById(id).classList.remove('on')}
 function iniciais(n){return String(n||'?').trim().split(/\s+/).slice(0,2).map(p=>p[0]).join('').toUpperCase()}
+
+/* ===== MÁSCARA DE MOEDA ===== */
+function mascarar(el){
+  const d=String(el.value).replace(/\D/g,'').replace(/^0+/,'');
+  el.value=d?(Number(d)/100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):'';
+}
+function aplicarMascaras(){
+  document.querySelectorAll('input[data-moeda]').forEach(el=>{
+    if(el._msk)return;el._msk=1;
+    el.setAttribute('inputmode','numeric');
+    el.addEventListener('input',()=>mascarar(el));
+  });
+}
+function porMoeda(el,v){el.value=v?Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}):''}
+
+/* ===== MODAL DE VALOR ===== */
+let mvResolve=null;
+function pedirValor({titulo='Valor',nome=null,valor=0}){
+  return new Promise(res=>{
+    mvResolve=res;
+    document.getElementById('mvTitulo').textContent=titulo;
+    document.getElementById('mvAreaNome').style.display=nome===null?'none':'block';
+    document.getElementById('mvNome').value=nome||'';
+    porMoeda(document.getElementById('mvValor'),valor);
+    document.getElementById('fValor').classList.add('on');
+    setTimeout(()=>document.getElementById(nome===null?'mvValor':'mvNome').focus(),120);
+  });
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Enter'&&document.getElementById('fValor').classList.contains('on')){e.preventDefault();fecharValor(true)}
+  if(e.key==='Escape'&&document.getElementById('fValor').classList.contains('on'))fecharValor(false);
+});
+function fecharValor(ok){
+  document.getElementById('fValor').classList.remove('on');
+  const r=mvResolve;mvResolve=null;
+  if(r)r(ok?{nome:document.getElementById('mvNome').value.trim(),valor:numero(document.getElementById('mvValor').value)}:null);
+}
 
 /* ===== AGENDA ===== */
 let dataSel=iso(new Date()), profSel='';
@@ -993,7 +1059,7 @@ function editarAg(id){
   if(a.clienteId)document.getElementById('agCliente').dataset.id=a.clienteId;else delete document.getElementById('agCliente').dataset.id;
   document.getElementById('agTel').value=a.tel||'';
   document.getElementById('agObs').value=a.obs||'';
-  document.getElementById('agCusto').value=a.custo||'';
+  porMoeda(document.getElementById('agCusto'),a.custo);
   document.getElementById('agLemb').value=a.lembrete==null?'':a.lembrete;
   document.getElementById('agStatus').value=a.status||'agendado';
   document.getElementById('agRep').value='0';document.getElementById('agRepQtd').style.display='none';
@@ -1064,11 +1130,11 @@ function addServico(id){
   if(servSel.length===1&&s.dur)document.getElementById('agDur').value=String(s.dur);
   document.getElementById('agServ').value='';document.getElementById('sugS').innerHTML='';chips();calcFim();
 }
-function addServicoAvulso(){
-  let nome=document.getElementById('agServ').value.trim();
-  if(!nome){nome=(prompt('Nome do serviço:','')||'').trim();if(!nome)return}
-  const v=prompt('Valor de "'+nome+'" (R$):','0');if(v===null)return;
-  servSel.push({nome,preco:numero(v)});
+async function addServicoAvulso(){
+  const digitado=document.getElementById('agServ').value.trim();
+  const r=await pedirValor({titulo:'Serviço avulso',nome:digitado,valor:0});
+  if(!r||!r.nome){if(r)toast('Informe o nome do serviço');return}
+  servSel.push({nome:r.nome,preco:r.valor});
   document.getElementById('agServ').value='';document.getElementById('sugS').innerHTML='';chips();
 }
 function chips(){
@@ -1077,10 +1143,10 @@ function chips(){
     +(servSel.length?'<p class="dica">Toque no valor para alterar o preço só neste agendamento.</p>':'');
   document.getElementById('agTotal').textContent=moeda(servSel.reduce((t,s)=>t+(Number(s.preco)||0),0));
 }
-function editarPreco(i){
-  const v=prompt('Valor de "'+servSel[i].nome+'" neste agendamento (R$):',String(servSel[i].preco).replace('.',','));
-  if(v===null)return;
-  servSel[i].preco=numero(v);chips();
+async function editarPreco(i){
+  const r=await pedirValor({titulo:servSel[i].nome,valor:servSel[i].preco});
+  if(!r)return;
+  servSel[i].preco=r.valor;chips();
 }
 function remServico(i){servSel.splice(i,1);chips()}
 function montarAg(data){
@@ -1189,7 +1255,7 @@ function abrirComanda(id){
     c.clienteId=ex?ex.id:'';salvar();abrirComanda(id);
   };
   document.getElementById('cmInfo').textContent=brData(c.data)+' · '+nomeProf(c.profId)+(c.pago?' · PAGO':'');
-  document.getElementById('cmDesc').value=c.desconto?String(c.desconto).replace('.',','):'';
+  porMoeda(document.getElementById('cmDesc'),c.desconto);
   document.getElementById('cmForma').value=c.forma||'dinheiro';
   document.getElementById('cmBusca').value='';document.getElementById('sugCm').innerHTML='';
   document.getElementById('cmBtnPagar').textContent=c.pago?'Reabrir (marcar como não pago)':'Marcar como pago';
@@ -1206,11 +1272,11 @@ function itensComanda(){
     :'<p class="dica">Nenhum item na comanda ainda.</p>';
   totalComanda();
 }
-function editarPrecoItem(i){
+async function editarPrecoItem(i){
   const c=db.comandas.find(x=>x.id===cmdAtual);
-  const v=prompt('Valor unitário de "'+c.itens[i].nome+'" (R$):',String(c.itens[i].preco).replace('.',','));
-  if(v===null)return;
-  c.itens[i].preco=numero(v);salvar();itensComanda();
+  const r=await pedirValor({titulo:c.itens[i].nome+' (valor unitário)',valor:c.itens[i].preco});
+  if(!r)return;
+  c.itens[i].preco=r.valor;salvar();itensComanda();
 }
 function qtdItem(i,n){
   const c=db.comandas.find(x=>x.id===cmdAtual);
@@ -1235,10 +1301,12 @@ function addItemCm(tipo,id){
   document.getElementById('cmBusca').value='';document.getElementById('sugCm').innerHTML='';
   salvar();itensComanda();
 }
-function addItemAvulsoCm(){
-  const nome=document.getElementById('cmBusca').value.trim();if(!nome)return;
+async function addItemAvulsoCm(){
+  const digitado=document.getElementById('cmBusca').value.trim();
+  const r=await pedirValor({titulo:'Item avulso',nome:digitado,valor:0});
+  if(!r||!r.nome){if(r)toast('Informe o nome do item');return}
   const c=db.comandas.find(x=>x.id===cmdAtual);
-  c.itens.push({tipo:'servico',nome,preco:numero(prompt('Valor de "'+nome+'" (R$):','0')),qtd:1});
+  c.itens.push({tipo:'servico',nome:r.nome,preco:r.valor,qtd:1});
   document.getElementById('cmBusca').value='';document.getElementById('sugCm').innerHTML='';
   salvar();itensComanda();
 }
@@ -1415,8 +1483,8 @@ function editarServico(id){
   editServ=id||null;
   const s=db.servicos.find(x=>x.id===id)||{nome:'',preco:'',dur:60,custo:'',sessoes:1};
   document.getElementById('sNome').value=s.nome;
-  document.getElementById('sPreco').value=s.preco===''?'':String(s.preco).replace('.',',');
-  document.getElementById('sCusto').value=s.custo?String(s.custo).replace('.',','):'';
+  porMoeda(document.getElementById('sPreco'),s.preco);
+  porMoeda(document.getElementById('sCusto'),s.custo);
   document.getElementById('sDur').value=s.dur||60;
   document.getElementById('sSessoes').value=s.sessoes||1;
   document.getElementById('delServ').style.display=id?'block':'none';
@@ -1453,8 +1521,8 @@ function editarProduto(id){
   editProd=id||null;
   const p=db.produtos.find(x=>x.id===id)||{nome:'',preco:'',custo:'',estoque:0,min:3};
   document.getElementById('pNome').value=p.nome;
-  document.getElementById('pPreco').value=p.preco===''?'':String(p.preco).replace('.',',');
-  document.getElementById('pCusto').value=p.custo?String(p.custo).replace('.',','):'';
+  porMoeda(document.getElementById('pPreco'),p.preco);
+  porMoeda(document.getElementById('pCusto'),p.custo);
   document.getElementById('pEstoque').value=p.estoque||0;
   document.getElementById('pMin').value=p.min==null?3:p.min;
   document.getElementById('delProd').style.display=id?'block':'none';
@@ -1491,7 +1559,7 @@ function editarDespesa(id){
   editDesp=id||null;
   const d=db.despesas.find(x=>x.id===id)||{desc:'',valor:'',data:iso(new Date()),cat:'Outros'};
   document.getElementById('dDesc').value=d.desc;
-  document.getElementById('dValor').value=d.valor===''?'':String(d.valor).replace('.',',');
+  porMoeda(document.getElementById('dValor'),d.valor);
   document.getElementById('dData').value=d.data;document.getElementById('dCat').value=d.cat;
   document.getElementById('delDesp').style.display=id?'block':'none';
   abrir('fDesp');
@@ -2034,7 +2102,7 @@ if(!db.servicos.length&&!db.ags.length&&!db.clientes.length){
   salvar();
 }
 [pIni,pFim]=limites('mes');
-render();prepararRel();
+render();prepararRel();aplicarMascaras();
 checarLembretes();
 setInterval(checarLembretes,30000);
 setInterval(()=>{if(dataSel===iso(new Date()))renderGrade()},60000);
