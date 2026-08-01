@@ -5,7 +5,7 @@
 const CACHE = 'agenda-v3';
 const ARQUIVOS = [
   './',
-  './agenda.html',
+  './index.html',
   './manifest.json',
   './icone-192.png',
   './icone-512.png'
