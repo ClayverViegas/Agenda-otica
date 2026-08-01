@@ -217,8 +217,8 @@ textarea.campo{min-height:74px;resize:vertical}
 @media print{
   @page{margin:12mm}
   html,body{background:#fff!important;height:auto!important;overflow:visible!important}
-  body>*{display:none!important}
-  body>#areaImpressao{display:block!important}
+  body.imprimindo>*{display:none!important}
+  body.imprimindo>#areaImpressao{display:block!important}
   #areaImpressao h1{font-size:15px;margin:0 0 2px;font-weight:700}
   #areaImpressao .p{font-size:12px;color:#555;margin-bottom:10px}
   #areaImpressao table{width:100%;border-collapse:collapse;font-size:11.5px}
@@ -807,6 +807,8 @@ textarea.campo{min-height:74px;resize:vertical}
 <div class="toast" id="toast"></div>
 
 <script>
+const tituloOriginal=document.title;
+
 /* ===== BANCO ===== */
 const CHAVE='agenda_atendimento_v2';
 let db={
@@ -1859,7 +1861,8 @@ function tabelaRel(){
     '</tbody></table><div class="rel-rod">'+relLinhas.length+' registro(s) · Gerado em: '+relGerado+'</div>';
 }
 function nomeArquivo(ext){
-  const per=relPeriodo.replace(/\//g,'-').replace(' até ','_a_').replace(/\s/g,'');
+  const p=(relPeriodo||'').split(' até ');
+  const per=(p[0]||'').replace(/\//g,'-')+'_a_'+(p[1]||'').replace(/\//g,'-');
   const base=(relTipo==='agendamentos'?'Relatorio-Agendamentos':'Horarios-Livres')+'_'+per;
   return ext?base+'.'+ext:base;
 }
@@ -1870,11 +1873,23 @@ function imprimirRel(){
     '<h1>'+esc(db.config.prof)+' — '+esc(titulo)+'</h1>'+
     '<div class="p">Período: '+relPeriodo+'</div>'+
     tabelaRel().replace('class="tab-rel"','').replace('class="rel-rod"','class="f"');
-  const tituloAntigo=document.title;
+  document.body.classList.add('imprimindo');
+  const tituloAntigo=tituloOriginal;
   document.title=nomeArquivo();
-  const limpar=()=>{document.title=tituloAntigo;document.getElementById('areaImpressao').innerHTML=''};
-  window.addEventListener('afterprint',limpar,{once:true});
-  setTimeout(()=>{window.print();setTimeout(limpar,4000)},120);
+  const restaurar=()=>{
+    if(document.visibilityState!=='visible')return;
+    document.body.classList.remove('imprimindo');
+    setTimeout(()=>{document.title=tituloAntigo},1200);
+    document.removeEventListener('visibilitychange',restaurar);
+    window.removeEventListener('focus',restaurar);
+  };
+  setTimeout(()=>{
+    window.print();
+    setTimeout(()=>{
+      document.addEventListener('visibilitychange',restaurar);
+      window.addEventListener('focus',restaurar);
+    },800);
+  },200);
 }
 function compartilharRel(){
   if(!ultimoTexto){toast('Gere o relatório primeiro');return}
