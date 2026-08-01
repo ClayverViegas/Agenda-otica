@@ -197,6 +197,12 @@ textarea.campo{min-height:74px;resize:vertical}
 .stepper{display:flex;align-items:center;gap:8px}
 .stepper button{width:32px;height:32px;border-radius:9px;background:#EDE7FB;color:var(--roxo);font-size:18px;font-weight:700}
 .stepper b{min-width:26px;text-align:center}
+.tab-rel{width:100%;border-collapse:collapse;font-size:13.5px;background:var(--card)}
+.tab-rel th{background:#EFEAFB;color:var(--tinta);text-align:left;padding:11px 10px;font-size:13px;font-weight:600;
+  border-bottom:1px solid var(--linha)}
+.tab-rel td{padding:11px 10px;border-bottom:1px solid var(--linha);vertical-align:top;line-height:1.35}
+.tab-rel td.h{white-space:nowrap;font-variant-numeric:tabular-nums}
+.rel-rod{padding:14px;color:var(--cinza);font-size:12.5px}
 @media print{
   header,.fab-area,.folha-topo,.nao-imprime{display:none!important}
   .folha{position:static;transform:none;visibility:visible}
@@ -624,8 +630,7 @@ textarea.campo{min-height:74px;resize:vertical}
 
 <!-- RELATÓRIO -->
 <div class="folha" id="fRel">
-  <div class="folha-topo"><button class="txt-btn" onclick="fechar('fRel')">Fechar</button><h2>Relatório de horários</h2>
-    <button class="txt-btn" onclick="compartilharRel()">↗</button></div>
+  <div class="folha-topo"><button class="txt-btn" onclick="fechar('fRel')">Fechar</button><h2>Relatório de horários</h2><span style="width:50px"></span></div>
   <div class="folha-corpo">
     <div class="seg" id="segRel">
       <button onclick="setRel('livres')">Horários livres</button>
@@ -659,10 +664,27 @@ textarea.campo{min-height:74px;resize:vertical}
     </select>
     <label class="rot" id="rotIncluir">Incluir observação</label>
     <select class="campo" id="rObs"><option value="0">Não</option><option value="1">Sim</option></select>
-    <button class="btn btn-p" onclick="gerarRel()">Gerar em tela</button>
-    <button class="btn btn-s" onclick="baixarCSV()">Exportar CSV</button>
-    <button class="btn btn-s nao-imprime" onclick="window.print()">Imprimir / salvar PDF</button>
-    <div id="saidaRel" style="margin-top:20px"></div>
+    <button class="btn btn-p" onclick="gerarRel()">Gerar relatório</button>
+  </div>
+</div>
+
+<!-- RESULTADO DO RELATÓRIO -->
+<div class="folha n2" id="fRelView">
+  <div class="folha-topo">
+    <button class="txt-btn" onclick="fechar('fRelView')">‹ Voltar</button>
+    <h2 id="rvTitulo">Relatório</h2>
+    <button class="txt-btn" style="font-size:20px" onclick="compartilharRel()">↗</button>
+  </div>
+  <div class="folha-corpo" style="padding:0">
+    <div style="padding:13px 14px;border-bottom:1px solid var(--linha);background:var(--card)">
+      <span style="color:var(--cinza);font-size:13px">Período: </span>
+      <b class="num" id="rvPeriodo" style="font-size:13.5px">—</b>
+    </div>
+    <div id="rvTabela"></div>
+    <div style="padding:14px">
+      <button class="btn btn-s" onclick="imprimirRel()">Imprimir / salvar PDF</button>
+      <button class="btn btn-s" onclick="baixarCSV()">Exportar CSV</button>
+    </div>
   </div>
 </div>
 
@@ -1640,7 +1662,6 @@ function setRel(t){
   document.querySelectorAll('#segRel button').forEach((b,i)=>b.classList.toggle('on',(i===0)===(t==='livres')));
   const esconder=t==='livres'?'none':'block';
   ['rotIncluir','rObs','rotCliente','rCliente','rotServico','rServico','rotStatus','rStatus'].forEach(i=>document.getElementById(i).style.display=esconder);
-  document.getElementById('saidaRel').innerHTML='';
 }
 function prepararRel(){
   const hoje=iso(new Date());
@@ -1677,8 +1698,8 @@ function periodoMes(){
 function gerarRel(){
   const ini=document.getElementById('rIni').value,fim=document.getElementById('rFim').value;
   if(!ini||!fim||fim<ini){toast('Confira o período');return}
-  const cab=`<div class="sec">Período: ${brCurta(ini)} até ${brCurta(fim)}</div>`;
   const temProf=db.profissionais.length>0;
+  let cabs,linhas;
   if(relTipo==='agendamentos'){
     const cli=document.getElementById('rCliente').value,obs=document.getElementById('rObs').value==='1';
     const fServ=document.getElementById('rServico').value,fSt=document.getElementById('rStatus').value;
@@ -1694,23 +1715,21 @@ function gerarRel(){
       return true;
     }).sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
     const tot=l.filter(a=>a.status!=='cancelado').reduce((t,a)=>t+valorAg(a),0);
+    cabs=(temProf?['Profissional']:[]).concat(['Horário','Cliente','Serviço(s)']);
+    linhas=l.map(a=>(temProf?[nomeProf(a.profId)]:[]).concat([
+      brData(a.data)+'<br>'+a.hora+' às '+hhmm(min(a.hora)+a.dur),
+      esc(a.tipo==='bloqueio'?'[Bloqueio]':nomeCliente(a)),
+      esc((a.servicos||[]).map(s=>s.nome).join(', ')||'—')+(obs&&a.obs?'<br><span style="color:#6B6580">'+esc(a.obs)+'</span>':'')
+    ]));
     ultimoRel=[['Profissional','Data','Horário','Cliente','Serviços','Valor','Status','Observação'],
-      ...l.map(a=>[nomeProf(a.profId),brCurta(a.data),a.hora+' - '+hhmm(min(a.hora)+a.dur),
+      ...l.map(a=>[nomeProf(a.profId),brCurta(a.data),a.hora+' às '+hhmm(min(a.hora)+a.dur),
         a.tipo==='bloqueio'?'[BLOQUEIO]':nomeCliente(a),(a.servicos||[]).map(s=>s.nome).join(' + '),
         valorAg(a).toFixed(2),a.status||'agendado',a.obs||''])];
-    ultimoTexto=`${db.config.prof}\nRelatório de agendamentos\nPeríodo: ${brCurta(ini)} a ${brCurta(fim)}\n\n`+
-      l.map(a=>`${brData(a.data)} ${a.hora}-${hhmm(min(a.hora)+a.dur)} · ${nomeCliente(a)} · ${(a.servicos||[]).map(s=>s.nome).join(', ')}`).join('\n')+
-      `\n\n${l.length} registro(s) — ${moeda(tot)}`;
-    document.getElementById('saidaRel').innerHTML=cab+(l.length?
-      `<table class="tabela"><thead><tr>${temProf?'<th>Profis.</th>':''}<th>Horário</th><th>Cliente</th><th>Serviço(s)</th><th>Valor</th></tr></thead><tbody>`+
-      l.map(a=>`<tr>${temProf?`<td>${esc(nomeProf(a.profId))}</td>`:''}
-        <td class="num" style="white-space:nowrap"><b>${brData(a.data)}</b><br>${a.hora} - ${hhmm(min(a.hora)+a.dur)}</td>
-        <td>${esc(a.tipo==='bloqueio'?'[Bloqueio]':nomeCliente(a))}<br>
-          <span class="badge ${a.status==='concluido'?'b-ok':a.status==='cancelado'?'b-cc':'b-ag'}">${a.status||'agendado'}</span></td>
-        <td>${esc((a.servicos||[]).map(s=>s.nome).join(', ')||'—')}${obs&&a.obs?'<br><span style="color:var(--cinza)">'+esc(a.obs)+'</span>':''}</td>
-        <td class="num">${moeda(valorAg(a))}</td></tr>`).join('')+
-      `</tbody></table><div class="total"><span>${l.length} registro(s)</span><b class="num">${moeda(tot)}</b></div>`
-      :'<p class="dica">Nenhum agendamento com esses filtros.</p>');
+    ultimoTexto=db.config.prof+'\nRelatório de agendamentos\nPeríodo: '+brCurta(ini)+' até '+brCurta(fim)+'\n\n'+
+      l.map(a=>brData(a.data)+' '+a.hora+' às '+hhmm(min(a.hora)+a.dur)+' · '+nomeCliente(a)+
+        ' · '+((a.servicos||[]).map(s=>s.nome).join(', ')||'—')).join('\n')+
+      '\n\n'+l.length+' registro(s)'+(tot?' — '+moeda(tot):'');
+    document.getElementById('rvTitulo').textContent='Relatório de Agendamentos';
   }else{
     const passo=Number(db.config.intervalo),livres=[];
     const a0=deIso(ini),b0=deIso(fim);
@@ -1723,17 +1742,49 @@ function gerarRel(){
         if(!ocup.some(a=>min(a.hora)<m+passo&&min(a.hora)+a.dur>m))slots.push(hhmm(m));
       if(slots.length)livres.push([s,slots]);
     }
+    cabs=['Data','Horários livres'];
+    linhas=livres.map(([d,s])=>[brData(d),s.join(' · ')]);
     ultimoRel=[['Data','Horários livres'],...livres.map(([d,s])=>[brCurta(d),s.join(' ')])];
-    ultimoTexto=`${db.config.prof}\nHorários livres · ${brCurta(ini)} a ${brCurta(fim)}\n\n`+
-      livres.map(([d,s])=>`${brData(d)}: ${s.join(', ')}`).join('\n');
-    document.getElementById('saidaRel').innerHTML=cab+(livres.length?
-      `<table class="tabela"><thead><tr><th>Dia</th><th>Horários livres</th></tr></thead><tbody>`+
-      livres.map(([d,s])=>`<tr><td class="num" style="white-space:nowrap"><b>${brData(d)}</b></td><td class="num">${s.join(' · ')}</td></tr>`).join('')+
-      '</tbody></table>':'<p class="dica">Nenhum horário livre no período.</p>');
+    ultimoTexto=db.config.prof+'\nHorários livres\nPeríodo: '+brCurta(ini)+' até '+brCurta(fim)+'\n\n'+
+      livres.map(([d,s])=>brData(d)+': '+s.join(', ')).join('\n');
+    document.getElementById('rvTitulo').textContent='Relatório de Horários Livres';
   }
+  const agora=new Date();
+  relGerado=brCurta(iso(agora))+' às '+hhmm(agora.getHours()*60+agora.getMinutes());
+  relPeriodo=brCurta(ini)+' até '+brCurta(fim);
+  relCabs=cabs;relLinhas=linhas;
+  document.getElementById('rvPeriodo').textContent=relPeriodo;
+  document.getElementById('rvTabela').innerHTML=linhas.length?tabelaRel():
+    '<p class="dica" style="padding:20px;text-align:center">Nenhum registro com esses filtros.</p>';
+  abrir('fRelView');
+}
+let relCabs=[],relLinhas=[],relPeriodo='',relGerado='';
+function tabelaRel(){
+  return '<table class="tab-rel"><thead><tr>'+relCabs.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>'+
+    relLinhas.map(l=>'<tr>'+l.map((c,i)=>'<td'+(i===relCabs.indexOf('Horário')?' class="h"':'')+'>'+c+'</td>').join('')+'</tr>').join('')+
+    '</tbody></table><div class="rel-rod">'+relLinhas.length+' registro(s) · Gerado em: '+relGerado+'</div>';
+}
+function imprimirRel(){
+  if(!relLinhas.length){toast('Nada para imprimir');return}
+  const html='<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><title>'+
+    esc(document.getElementById('rvTitulo').textContent)+'</title><style>'+
+    '@page{margin:12mm}body{font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#1B1526;margin:0}'+
+    'h1{font-size:15px;margin:0 0 2px}.p{font-size:12px;color:#555;margin-bottom:10px}'+
+    'table{width:100%;border-collapse:collapse;font-size:11.5px}'+
+    'th{background:#EFEAFB;text-align:left;padding:6px 7px;border-bottom:1px solid #bbb;font-size:11.5px}'+
+    'td{padding:6px 7px;border-bottom:1px solid #ddd;vertical-align:top}'+
+    '.f{margin-top:10px;font-size:10.5px;color:#666}tr{page-break-inside:avoid}'+
+    '</style></head><body><h1>'+esc(db.config.prof)+' — '+esc(document.getElementById('rvTitulo').textContent)+'</h1>'+
+    '<div class="p">Período: '+relPeriodo+'</div>'+tabelaRel().replace('class="tab-rel"','').replace(/class="rel-rod"/,'class="f"')+
+    '</body></html>';
+  const f=document.createElement('iframe');
+  f.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0';
+  document.body.appendChild(f);
+  f.contentDocument.open();f.contentDocument.write(html);f.contentDocument.close();
+  setTimeout(()=>{f.contentWindow.focus();f.contentWindow.print();setTimeout(()=>f.remove(),1500)},350);
 }
 function compartilharRel(){
-  if(!ultimoTexto){gerarRel();if(!ultimoTexto)return}
+  if(!ultimoTexto){toast('Gere o relatório primeiro');return}
   compartilhar(ultimoTexto,'Relatório');
 }
 function baixarCSV(){
