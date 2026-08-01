@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#4C1D95">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Agenda • Atendimento</title>
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icone-180.png">
+<link rel="icon" href="./icone-192.png">
+<style>
+:root{
+  --roxo:#4C1D95; --roxo-2:#6D28D9; --roxo-3:#8B5CF6;
+  --tinta:#1B1526; --cinza:#6B6580; --linha:#E6E1F0;
+  --fundo:#F7F5FB; --card:#FFFFFF;
+  --verde:#0D9488; --ambar:#B45309; --vermelho:#BE123C;
+  --r:14px; --sombra:0 2px 10px rgba(38,18,77,.08);
+  --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-t:env(safe-area-inset-top,0px);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:var(--fundo); color:var(--tinta);
+  font-size:16px; line-height:1.4; overscroll-behavior-y:none;
+}
+button,input,select,textarea{font-family:inherit;font-size:16px;color:inherit}
+button{cursor:pointer;border:none;background:none}
+.num{font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+
+/* ---------- topo ---------- */
+header{
+  position:sticky;top:0;z-index:40;background:var(--card);
+  padding-top:var(--safe-t);border-bottom:1px solid var(--linha);
+}
+.barra{display:flex;align-items:center;gap:4px;padding:10px 12px}
+.icone{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;font-size:19px;color:var(--roxo-2)}
+.icone:active{background:#F1ECFB}
+.titulo-app{flex:1;font-weight:700;font-size:17px;letter-spacing:-.02em}
+.titulo-app small{display:block;font-weight:500;font-size:11.5px;color:var(--cinza);letter-spacing:0}
+
+.semana{display:flex;padding:0 6px 8px}
+.dia{flex:1;padding:6px 0 7px;border-radius:12px;text-align:center;position:relative}
+.dia .dsem{font-size:10.5px;color:var(--cinza);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.dia .dnum{font-size:19px;font-weight:600;margin-top:1px}
+.dia.hoje .dnum{color:var(--roxo-2)}
+.dia.sel{background:var(--roxo)}
+.dia.sel .dsem,.dia.sel .dnum{color:#fff}
+.dia .pt{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--roxo-3)}
+.dia.sel .pt{background:#fff}
+.data-longa{text-align:center;font-size:13px;color:var(--roxo-2);font-weight:600;padding-bottom:9px;text-transform:capitalize}
+
+/* ---------- timeline ---------- */
+main{padding-bottom:calc(150px + var(--safe-b))}
+.grade{position:relative;margin:10px 12px}
+.atalhos{display:flex;flex-wrap:wrap;gap:7px}
+.atalhos button{background:#EDE7FB;color:var(--roxo);padding:9px 13px;border-radius:999px;font-size:13px;font-weight:650}
+.atalhos button.on{background:var(--roxo);color:#fff}
+.nav-cal{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.nav-cal button{width:44px;height:44px;border-radius:12px;font-size:24px;color:var(--roxo-2);background:#F2F0F7}
+.nav-cal b{font-size:18px;font-weight:700;text-transform:capitalize;letter-spacing:-.02em;padding:6px 12px;border-radius:10px}
+.nav-cal b:active{background:#F2F0F7}
+.gd .dia-cal{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:#fff;box-shadow:var(--sombra)}
+.gd .dia-cal.fora{background:#F2F0F7;box-shadow:none;color:#A9A3B8}
+.gd .dia-cal.hoje{outline:2px solid var(--roxo-3);outline-offset:-2px}
+.gd .dia-cal.sel{background:var(--roxo);color:#fff}
+.gd .dia-cal .pts{display:flex;gap:2px;height:5px}
+.gd .dia-cal .pts i{width:5px;height:5px;border-radius:50%;background:var(--roxo-2)}
+.gd .dia-cal.sel .pts i{background:#fff}
+.gd .dia-cal .qtd{font-size:9px;font-weight:700;color:var(--roxo-2)}
+.gd .dia-cal.sel .qtd{color:#fff}
+.legenda{display:flex;gap:16px;justify-content:center;margin-top:14px;font-size:11.5px;color:var(--cinza)}
+.legenda i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.anos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.mini-mes{background:#fff;border-radius:12px;padding:10px 8px;box-shadow:var(--sombra);text-align:center}
+.mini-mes b{display:block;font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--roxo)}
+.mini-mes .barra-q{height:4px;border-radius:2px;background:#EDE7FB;margin:7px 0 5px;overflow:hidden}
+.mini-mes .barra-q span{display:block;height:100%;background:var(--roxo-2)}
+.mini-mes small{font-size:10.5px;color:var(--cinza)}
+.mini-mes.atual{outline:2px solid var(--roxo-3);outline-offset:-2px}
+.hora-l{position:absolute;left:0;right:0;border-top:1px solid var(--linha)}
+.hora-l.meia{border-top-style:dashed;opacity:.55}
+.hora-t{position:absolute;left:0;transform:translateY(-8px);font-size:11.5px;color:var(--cinza);width:44px;font-weight:600}
+.pista{position:absolute;left:52px;right:0;top:0;bottom:0}
+.agora{position:absolute;left:44px;right:0;height:2px;background:var(--vermelho);z-index:5;border-radius:2px}
+.agora::before{content:'';position:absolute;left:-5px;top:-4px;width:10px;height:10px;border-radius:50%;background:var(--vermelho)}
+.bloco{
+  position:absolute;left:0;right:0;border-radius:11px;padding:7px 10px;overflow:hidden;
+  background:#EDE7FB;border-left:4px solid var(--roxo-2);box-shadow:var(--sombra);
+}
+.bloco b{display:block;font-size:14px;font-weight:650;line-height:1.25}
+.bloco span{display:block;font-size:11.5px;color:var(--cinza);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bloco.bloqueio{background:#EFEDF3;border-left-color:#9A93AD;
+  background-image:repeating-linear-gradient(45deg,rgba(0,0,0,.035) 0 6px,transparent 6px 12px)}
+.bloco.concluido{background:#E0F2F0;border-left-color:var(--verde)}
+.bloco.cancelado{background:#F6F6F8;border-left-color:#C9C4D6;opacity:.65}
+.bloco.cancelado b{text-decoration:line-through}
+.vazio{text-align:center;color:var(--cinza);font-size:13.5px;padding:26px 20px}
+
+/* ---------- botão flutuante ---------- */
+.fab-area{position:fixed;right:16px;bottom:calc(18px + var(--safe-b));z-index:60;display:flex;flex-direction:column;align-items:flex-end;gap:12px}
+.fab{width:60px;height:60px;border-radius:50%;background:var(--roxo);color:#fff;font-size:27px;
+  display:grid;place-items:center;box-shadow:0 6px 18px rgba(76,29,149,.4);transition:transform .22s}
+.fab.aberto{transform:rotate(45deg)}
+.mini{display:flex;align-items:center;gap:10px;opacity:0;transform:translateY(12px) scale(.9);pointer-events:none;transition:.18s}
+.fab-area.on .mini{opacity:1;transform:none;pointer-events:auto}
+.mini span{background:#fff;padding:7px 12px;border-radius:9px;font-size:13.5px;font-weight:650;box-shadow:var(--sombra)}
+.mini i{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:19px;color:#fff;box-shadow:var(--sombra)}
+.veu{position:fixed;inset:0;background:rgba(27,21,38,.4);z-index:50;opacity:0;pointer-events:none;transition:.2s}
+.veu.on{opacity:1;pointer-events:auto}
+
+/* ---------- folha / modal ---------- */
+.folha{position:fixed;inset:0;z-index:80;background:var(--fundo);display:flex;flex-direction:column;
+  transform:translateY(100%);transition:transform .26s cubic-bezier(.32,.72,0,1);visibility:hidden}
+.folha.on{transform:none;visibility:visible}
+.folha-topo{background:var(--card);border-bottom:1px solid var(--linha);padding-top:var(--safe-t);
+  display:flex;align-items:center;gap:8px;padding-left:12px;padding-right:12px;min-height:54px;flex-shrink:0}
+.folha-topo h2{flex:1;margin:0;font-size:17px;text-align:center;font-weight:700;letter-spacing:-.02em}
+.txt-btn{color:var(--roxo-2);font-weight:650;font-size:15px;padding:8px 4px;white-space:nowrap}
+.folha-corpo{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px calc(30px + var(--safe-b))}
+
+label.rot{display:block;font-size:12.5px;color:var(--cinza);margin:14px 0 5px;font-weight:600}
+.campo,select.campo,textarea.campo{
+  width:100%;background:#F2F0F7;border:1px solid transparent;border-radius:var(--r);
+  padding:13px 14px;outline:none;appearance:none
+}
+.campo:focus{border-color:var(--roxo-3);background:#fff}
+select.campo{background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%236B6580' stroke-width='2'><path d='M2 4l5 5 5-5'/></svg>");
+  background-repeat:no-repeat;background-position:right 14px center}
+textarea.campo{min-height:74px;resize:vertical}
+.linha2{display:flex;gap:10px}
+.linha2>div{flex:1;min-width:0}
+.seg{display:flex;background:#EDEAF5;border-radius:12px;padding:4px;gap:4px}
+.seg button{flex:1;padding:9px;border-radius:9px;font-weight:650;font-size:14px;color:var(--cinza)}
+.seg button.on{background:#fff;color:var(--roxo);box-shadow:var(--sombra)}
+.btn{display:block;width:100%;padding:15px;border-radius:var(--r);font-weight:700;font-size:16px;text-align:center;margin-top:12px}
+.btn-p{background:var(--roxo);color:#fff}
+.btn-s{background:#F3EEFD;color:var(--roxo);border:1px solid #E2D8FA}
+.btn-d{background:#FDF0F3;color:var(--vermelho)}
+.btn[disabled]{background:#EAE7F0;color:#A9A3B8;border-color:transparent}
+.dica{font-size:12px;color:var(--cinza);margin-top:7px;line-height:1.45}
+.chip{display:inline-flex;align-items:center;gap:7px;background:#EDE7FB;color:var(--roxo);
+  padding:8px 12px;border-radius:999px;font-size:13.5px;font-weight:650;margin:0 6px 6px 0}
+.chip b{font-weight:700}
+.chip button{color:var(--roxo-2);font-size:16px;line-height:1}
+.total{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:15px}
+.total b{font-size:19px}
+.sug{background:#fff;border:1px solid var(--linha);border-radius:12px;margin-top:6px;overflow:hidden;box-shadow:var(--sombra)}
+.sug div{padding:12px 14px;border-bottom:1px solid var(--linha);font-size:14.5px}
+.sug div:last-child{border-bottom:none}
+.sug div:active{background:#F5F1FE}
+.sug .add{color:var(--verde);font-weight:650}
+
+.item{background:var(--card);border-radius:var(--r);padding:13px 14px;margin-bottom:9px;box-shadow:var(--sombra);
+  display:flex;align-items:center;gap:12px}
+.item .info{flex:1;min-width:0}
+.item .info b{display:block;font-size:15px;font-weight:650}
+.item .info span{display:block;font-size:12.5px;color:var(--cinza);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .val{font-weight:700;font-size:14px;color:var(--roxo)}
+.av{width:40px;height:40px;border-radius:50%;background:#EDE7FB;color:var(--roxo);display:grid;place-items:center;font-weight:700;font-size:15px;flex-shrink:0}
+.sec{font-size:12px;font-weight:700;color:var(--cinza);text-transform:uppercase;letter-spacing:.07em;margin:20px 0 9px}
+.tabela{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:var(--sombra)}
+.tabela th{background:#EFEAFB;color:var(--roxo);text-align:left;padding:10px;font-size:11.5px;text-transform:uppercase;letter-spacing:.05em}
+.tabela td{padding:10px;border-top:1px solid var(--linha);vertical-align:top}
+.badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700}
+.b-ok{background:#DCF2F0;color:var(--verde)}
+.b-ag{background:#EDE7FB;color:var(--roxo)}
+.b-cc{background:#F1EFF5;color:var(--cinza)}
+.aviso{background:#FFF7E8;border:1px solid #F5E3BE;color:#8A5A00;padding:11px 13px;border-radius:12px;font-size:13px;margin-bottom:12px}
+.toast{position:fixed;left:50%;bottom:calc(96px + var(--safe-b));transform:translate(-50%,20px);
+  background:var(--tinta);color:#fff;padding:12px 18px;border-radius:999px;font-size:14px;font-weight:600;
+  z-index:200;opacity:0;pointer-events:none;transition:.25s;max-width:88vw;text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.menu-lista div{display:flex;align-items:center;gap:13px;background:var(--card);padding:15px;border-radius:var(--r);
+  margin-bottom:9px;font-weight:600;box-shadow:var(--sombra)}
+.menu-lista div i{font-style:normal;font-size:19px;width:26px;text-align:center}
+.gd{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:8px}
+.gd button{aspect-ratio:1;border-radius:10px;background:#F2F0F7;font-size:14px;font-weight:600}
+.gd button.on{background:var(--roxo);color:#fff}
+.gd button.off{opacity:.25}
+.gd .cab{aspect-ratio:auto;background:none;font-size:11px;color:var(--cinza);padding:2px 0}
+@media print{
+  header,.fab-area,.folha-topo,.nao-imprime{display:none!important}
+  .folha{position:static;transform:none;visibility:visible}
+  body{background:#fff}
+  .folha-corpo{overflow:visible;padding:0}
+  .tabela{box-shadow:none;border:1px solid #ccc}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="barra">
+    <button class="icone" onclick="abrir('fMenu')">☰</button>
+    <div class="titulo-app">Agenda<small id="nomeProf">Atendimento</small></div>
+    <button class="icone" onclick="abrir('fBusca')">🔍</button>
+    <button class="icone" onclick="abrirCal()">📅</button>
+    <button class="icone" onclick="irHoje()" title="Hoje">⦿</button>
+  </div>
+  <div class="semana" id="semana"></div>
+  <div class="data-longa" id="dataLonga"></div>
+</header>
+
+<main>
+  <div class="grade" id="grade"></div>
+  <div class="vazio" id="vazio" style="display:none">Nenhum atendimento neste dia.<br>Toque em + para agendar.</div>
+</main>
+
+<div class="veu" id="veu" onclick="fab(false)"></div>
+<div class="fab-area" id="fabArea">
+  <div class="mini" onclick="abrir('fEspera')"><span>Lista de espera</span><i style="background:#2563EB">📋</i></div>
+  <div class="mini" onclick="novo('bloqueio')"><span>Novo bloqueio</span><i style="background:#7C6F93">🔒</i></div>
+  <div class="mini" onclick="novo('agendamento')"><span>Novo agendamento</span><i style="background:var(--verde)">📆</i></div>
+  <button class="fab" id="fabBtn" onclick="fab()">+</button>
+</div>
+
+<!-- ====== AGENDAMENTO ====== -->
+<div class="folha" id="fAg">
+  <div class="folha-topo">
+    <button class="txt-btn" onclick="fechar('fAg')">Fechar</button>
+    <h2 id="tituloAg">Agendamento</h2>
+    <button class="txt-btn" id="btnExcluir" style="color:var(--vermelho);display:none" onclick="excluirAg()">Excluir</button>
+    <span id="espacoAg" style="width:54px"></span>
+  </div>
+  <div class="folha-corpo">
+    <div class="seg" id="segTipo">
+      <button class="on" onclick="setTipo('agendamento')">Agendamento</button>
+      <button onclick="setTipo('bloqueio')">Bloqueio</button>
+    </div>
+
+    <div class="linha2">
+      <div><label class="rot">Data</label><input type="date" class="campo num" id="agData" onchange="calcFim()"></div>
+      <div><label class="rot">Horário</label><input type="time" class="campo num" id="agHora" onchange="calcFim()"></div>
+    </div>
+    <div class="dica" id="janela">—</div>
+
+    <div id="areaCliente">
+      <label class="rot">Cliente</label>
+      <input class="campo" id="agCliente" placeholder="Buscar ou digitar nome…" autocomplete="off"
+             oninput="sugCliente()" onfocus="sugCliente()">
+      <div id="sugC"></div>
+      <input class="campo" id="agTel" placeholder="Telefone (opcional)" style="margin-top:8px" inputmode="tel">
+    </div>
+
+    <div id="areaServico">
+      <label class="rot">Serviços</label>
+      <input class="campo" id="agServ" placeholder="Buscar serviço…" autocomplete="off"
+             oninput="sugServico()" onfocus="sugServico()">
+      <div id="sugS"></div>
+      <div id="chipsServ" style="margin-top:10px"></div>
+      <div class="total"><span>Total</span><b class="num" id="agTotal">R$ 0,00</b></div>
+    </div>
+
+    <label class="rot">Duração</label>
+    <select class="campo" id="agDur" onchange="calcFim()">
+      <option value="15">15 min</option><option value="30">30 min</option><option value="45">45 min</option>
+      <option value="60" selected>1 h</option><option value="90">1 h 30</option><option value="120">2 h</option>
+      <option value="180">3 h</option><option value="240">4 h</option><option value="360">6 h</option><option value="480">8 h</option>
+    </select>
+
+    <label class="rot">Repetir</label>
+    <select class="campo" id="agRep">
+      <option value="0">Não repetir</option>
+      <option value="1">Toda semana</option>
+      <option value="2">A cada 15 dias</option>
+      <option value="3">Todo mês</option>
+      <option value="4">Todo dia</option>
+    </select>
+    <input class="campo num" type="number" id="agRepQtd" value="4" min="2" max="52" style="margin-top:8px;display:none" placeholder="Quantas vezes">
+
+    <button class="txt-btn" style="width:100%;text-align:center;margin-top:16px" onclick="maisCampos()" id="btnMais">Mais campos (observação, custos…)</button>
+    <div id="extra" style="display:none">
+      <label class="rot">Observação</label>
+      <textarea class="campo" id="agObs" placeholder="Ex.: cliente prefere atendimento no balcão"></textarea>
+      <label class="rot">Custos do serviço (R$)</label>
+      <input class="campo num" id="agCusto" inputmode="decimal" placeholder="0,00">
+      <label class="rot">Lembrete</label>
+      <select class="campo" id="agLemb">
+        <option value="">Usar padrão das configurações</option>
+        <option value="0">Sem lembrete</option><option value="15">15 min antes</option>
+        <option value="30">30 min antes</option><option value="60">1 h antes</option>
+        <option value="120">2 h antes</option><option value="1440">1 dia antes</option>
+      </select>
+      <label class="rot">Status</label>
+      <select class="campo" id="agStatus">
+        <option value="agendado">Agendado</option><option value="concluido">Concluído</option><option value="cancelado">Cancelado</option>
+      </select>
+    </div>
+
+    <button class="btn btn-p" onclick="salvarAg()">Salvar</button>
+    <button class="btn btn-s" onclick="abrirMultiplo()">Agendamento múltiplo</button>
+    <p class="dica">Agende vários dias/horários para esta mesma seleção — útil para pacotes, comandas ou visitas recorrentes.</p>
+  </div>
+</div>
+
+<!-- ====== MÚLTIPLO ====== -->
+<div class="folha" id="fMulti">
+  <div class="folha-topo">
+    <button class="txt-btn" onclick="fechar('fMulti')">Voltar</button>
+    <h2>Agendamento múltiplo</h2><span style="width:54px"></span>
+  </div>
+  <div class="folha-corpo">
+    <p class="dica">Toque nos dias em que este mesmo atendimento deve acontecer. O horário e a duração são os mesmos da tela anterior.</p>
+    <div class="linha2" style="margin-top:12px">
+      <div><label class="rot">Mês</label><select class="campo" id="mMes" onchange="gradeMulti()"></select></div>
+      <div><label class="rot">Ano</label><select class="campo num" id="mAno" onchange="gradeMulti()"></select></div>
+    </div>
+    <div class="gd" id="gdMulti"></div>
+    <div id="chipsDatas" style="margin-top:14px"></div>
+    <button class="btn btn-p" onclick="salvarMulti()">Salvar selecionados</button>
+  </div>
+</div>
+
+<!-- ====== CALENDÁRIO ====== -->
+<div class="folha" id="fCal">
+  <div class="folha-topo">
+    <button class="txt-btn" onclick="fechar('fCal')">Fechar</button>
+    <h2 id="calTitulo">Calendário</h2>
+    <button class="txt-btn" id="calAlternar" onclick="alternarCal()">Ano</button>
+  </div>
+  <div class="folha-corpo">
+    <div class="nav-cal">
+      <button onclick="passoCal(-1)">‹</button>
+      <b id="calRotulo" onclick="alternarCal()">—</b>
+      <button onclick="passoCal(1)">›</button>
+    </div>
+    <div id="calMes">
+      <div class="gd" id="gdCal"></div>
+      <div class="legenda">
+        <span><i style="background:var(--roxo-2)"></i>com agendamento</span>
+        <span><i style="background:#C9C4D6"></i>fora do expediente</span>
+      </div>
+      <div id="resumoMes"></div>
+    </div>
+    <div id="calAno" style="display:none">
+      <div class="anos" id="gdAno"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MENU ====== -->
+<div class="folha" id="fMenu">
+  <div class="folha-topo">
+    <button class="txt-btn" onclick="fechar('fMenu')">Fechar</button>
+    <h2>Menu</h2><span style="width:54px"></span>
+  </div>
+  <div class="folha-corpo menu-lista">
+    <div onclick="abrir('fClientes');listaClientes()"><i>👤</i>Clientes</div>
+    <div onclick="abrir('fServicos');listaServicos()"><i>🏷️</i>Serviços e preços</div>
+    <div onclick="abrir('fRel')"><i>📄</i>Relatório de horários</div>
+    <div onclick="abrir('fEspera');listaEspera()"><i>📋</i>Lista de espera</div>
+    <div onclick="abrir('fAniv');listaAniv()"><i>🎂</i>Aniversariantes</div>
+    <div onclick="abrir('fConfig');carregarConfig()"><i>⚙️</i>Configurações</div>
+    <div onclick="abrir('fDados')"><i>💾</i>Backup dos dados</div>
+  </div>
+</div>
+
+<!-- ====== CLIENTES ====== -->
+<div class="folha" id="fClientes">
+  <div class="folha-topo">
+    <button class="txt-btn" onclick="fechar('fClientes')">Fechar</button>
+    <h2>Clientes</h2>
+    <button class="txt-btn" onclick="editarCliente()">Novo</button>
+  </div>
+  <div class="folha-corpo">
+    <input class="campo" id="buscaCli" placeholder="Buscar cliente…" oninput="listaClientes()">
+    <div id="listaCli" style="margin-top:14px"></div>
+  </div>
+</div>
+
+<div class="folha" id="fCli">
+  <div class="folha-topo">
+    <button class="txt-btn" onclick="fechar('fCli')">Voltar</button>
+    <h2 id="tCli">Cliente</h2>
+    <button class="txt-btn" style="color:var(--vermelho)" id="delCli" onclick="excluirCliente()">Excluir</button>
+  </div>
+  <div class="folha-corpo">
+    <label class="rot">Nome</label><input class="campo" id="cNome">
+    <label class="rot">Telefone / WhatsApp</label><input class="campo" id="cTel" inputmode="tel">
+    <label class="rot">Aniversário</label><input class="campo num" type="date" id="cAniv">
+    <label class="rot">Observações</label><textarea class="campo" id="cObs"></textarea>
+    <button class="btn btn-p" onclick="salvarCliente()">Salvar cliente</button>
+    <div id="histCli"></div>
+  </div>
+</div>
+
+<!-- ====== SERVIÇOS ====== -->
+<div class="folha" id="fServicos">
+  <div class="folha-topo">
+    <button class="txt-btn" onclick="fechar('fServicos')">Fechar</button>
+    <h2>Serviços</h2>
+    <button class="txt-btn" onclick="editarServico()">Novo</button>
+  </div>
+  <div class="folha-corpo"><div id="listaServ"></div></div>
+</div>
+
+<div class="folha" id="fServ">
+  <div class="folha-topo">
+    <button class="txt-btn" onclick="fechar('fServ')">Voltar</button>
+    <h2>Serviço</h2>
+    <button class="txt-btn" style="color:var(--vermelho)" id="delServ" onclick="excluirServico()">Excluir</button>
+  </div>
+  <div class="folha-corpo">
+    <label class="rot">Nome do serviço</label><input class="campo" id="sNome">
+    <label class="rot">Preço (R$)</label><input class="campo num" id="sPreco" inputmode="decimal" placeholder="0,00">
+    <label class="rot">Duração padrão</label>
+    <select class="campo" id="sDur">
+      <option value="15">15 min</option><option value="30">30 min</option><option value="45">45 min</option>
+      <option value="60" selected>1 h</option><option value="90">1 h 30</option><option value="120">2 h</option><option value="180">3 h</option>
+    </select>
+    <button class="btn btn-p" onclick="salvarServico()">Salvar serviço</button>
+  </div>
+</div>
+
+<!-- ====== RELATÓRIO ====== -->
+<div class="folha" id="fRel">
+  <div class="folha-topo">
+    <button class="txt-btn" onclick="fechar('fRel')">Fechar</button>
+    <h2>Relatório de horários</h2><span style="width:54px"></span>
+  </div>
+  <div class="folha-corpo">
+    <div class="seg" id="segRel">
+      <button onclick="setRel('livres')">Horários livres</button>
+      <button class="on" onclick="setRel('agendamentos')">Agendamentos</button>
+    </div>
+    <label class="rot">Período rápido</label>
+    <div class="atalhos" id="atalhos">
+      <button onclick="periodo('hoje',this)">Hoje</button>
+      <button onclick="periodo('semana',this)">Esta semana</button>
+      <button onclick="periodo('mes',this)">Este mês</button>
+      <button onclick="periodo('passado',this)">Mês passado</button>
+      <button onclick="periodo('30',this)">Próx. 30 dias</button>
+      <button onclick="periodo('ano',this)">Este ano</button>
+    </div>
+    <div class="linha2" style="margin-top:8px">
+      <div><select class="campo" id="rMes" onchange="periodoMes()"></select></div>
+      <div><select class="campo num" id="rAno" onchange="periodoMes()"></select></div>
+    </div>
+    <div class="linha2" style="margin-top:14px">
+      <div><label class="rot" style="margin-top:0">Data início</label><input type="date" class="campo num" id="rIni"></div>
+      <div><label class="rot" style="margin-top:0">Data fim</label><input type="date" class="campo num" id="rFim"></div>
+    </div>
+    <label class="rot" id="rotCliente">Cliente</label>
+    <select class="campo" id="rCliente"></select>
+    <label class="rot" id="rotServico">Serviço</label>
+    <select class="campo" id="rServico"></select>
+    <label class="rot" id="rotStatus">Status</label>
+    <select class="campo" id="rStatus">
+      <option value="">Todos</option>
+      <option value="agendado">Somente agendados</option>
+      <option value="concluido">Somente concluídos</option>
+      <option value="cancelado">Somente cancelados</option>
+      <option value="ativos">Agendados + concluídos</option>
+    </select>
+    <label class="rot" id="rotIncluir">Incluir observação</label>
+    <select class="campo" id="rObs"><option value="0">Não</option><option value="1">Sim</option></select>
+    <button class="btn btn-p" onclick="gerarRel()">Gerar em tela</button>
+    <button class="btn btn-s" onclick="baixarCSV()">Exportar CSV</button>
+    <button class="btn btn-s nao-imprime" onclick="window.print()">Imprimir / salvar PDF</button>
+    <div id="saidaRel" style="margin-top:20px"></div>
+  </div>
+</div>
+
+<!-- ====== ESPERA ====== -->
+<div class="folha" id="fEspera">
+  <div class="folha-topo">
+    <button class="txt-btn" onclick="fechar('fEspera')">Fechar</button>
+    <h2>Lista de espera</h2><span style="width:54px"></span>
+  </div>
+  <div class="folha-corpo">
+    <label class="rot">Nome</label><input class="campo" id="eNome">
+    <div class="linha2">
+      <div><label class="rot">Telefone</label><input class="campo" id="eTel" inputmode="tel"></div>
+      <div><label class="rot">Preferência</label><input class="campo" id="ePref" placeholder="Ex.: manhã"></div>
+    </div>
+    <button class="btn btn-p" onclick="addEspera()">Adicionar à lista</button>
+    <div id="listaEsp" style="margin-top:20px"></div>
+  </div>
+</div>
+
+<!-- ====== ANIVERSÁRIOS ====== -->
+<div class="folha" id="fAniv">
+  <div class="folha-topo">
+    <button class="txt-btn" onclick="fechar('fAniv')">Fechar</button>
+    <h2>Aniversariantes</h2><span style="width:54px"></span>
+  </div>
+  <div class="folha-corpo"><div id="listaAn"></div></div>
+</div>
+
+<!-- ====== BUSCA ====== -->
+<div class="folha" id="fBusca">
+  <div class="folha-topo">
+    <button class="txt-btn" onclick="fechar('fBusca')">Fechar</button>
+    <h2>Buscar agendamento</h2><span style="width:54px"></span>
+  </div>
+  <div class="folha-corpo">
+    <input class="campo" id="bq" placeholder="Cliente, serviço ou observação…" oninput="buscar()">
+    <div id="resBusca" style="margin-top:16px"></div>
+  </div>
+</div>
+
+<!-- ====== CONFIG ====== -->
+<div class="folha" id="fConfig">
+  <div class="folha-topo">
+    <button class="txt-btn" onclick="fechar('fConfig')">Fechar</button>
+    <h2>Configurações</h2><span style="width:54px"></span>
+  </div>
+  <div class="folha-corpo">
+    <label class="rot">Nome do profissional / empresa</label><input class="campo" id="kProf">
+    <div class="linha2">
+      <div><label class="rot">Abre às</label><input type="time" class="campo num" id="kIni"></div>
+      <div><label class="rot">Fecha às</label><input type="time" class="campo num" id="kFim"></div>
+    </div>
+    <label class="rot">Lembrete padrão</label>
+    <select class="campo" id="kLemb">
+      <option value="0">Sem lembrete</option><option value="15">15 min antes</option><option value="30">30 min antes</option>
+      <option value="60">1 h antes</option><option value="120">2 h antes</option><option value="1440">1 dia antes</option>
+    </select>
+    <label class="rot">Intervalo entre horários livres</label>
+    <select class="campo" id="kInt"><option value="15">15 min</option><option value="30">30 min</option><option value="60">1 h</option></select>
+    <label class="rot">Dias de atendimento</label>
+    <div class="gd" id="gdDias"></div>
+    <button class="btn btn-p" onclick="salvarConfig()">Salvar configurações</button>
+    <div id="statusNot" class="aviso" style="margin-top:18px;display:none"></div>
+    <button class="btn btn-s" onclick="pedirNotificacao()">Ativar notificações de lembrete</button>
+    <button class="btn btn-s" id="btnInstalar" style="display:none" onclick="instalar()">Instalar na tela de início</button>
+    <div id="avisoOffline" class="aviso" style="display:none;margin-top:14px">Sem internet — a agenda continua funcionando normalmente, tudo está salvo no aparelho.</div>
+  </div>
+</div>
+
+<!-- ====== DADOS ====== -->
+<div class="folha" id="fDados">
+  <div class="folha-topo">
+    <button class="txt-btn" onclick="fechar('fDados')">Fechar</button>
+    <h2>Backup dos dados</h2><span style="width:54px"></span>
+  </div>
+  <div class="folha-corpo">
+    <div class="aviso">Tudo fica salvo apenas neste aparelho, no navegador. Limpar os dados do navegador apaga a agenda — faça backup de vez em quando.</div>
+    <button class="btn btn-p" onclick="exportarJSON()">Baixar backup (.json)</button>
+    <label class="rot">Restaurar backup</label>
+    <input type="file" class="campo" accept=".json" onchange="importarJSON(this)">
+    <button class="btn btn-d" onclick="apagarTudo()">Apagar todos os dados</button>
+    <div id="uso" class="dica" style="margin-top:16px"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   BANCO LOCAL
+========================================================= */
+const CHAVE='agenda_atendimento_v1';
+let db={clientes:[],servicos:[],ags:[],espera:[],config:{
+  prof:'Atendimento',ini:'08:00',fim:'20:00',lembrete:60,intervalo:30,dias:[1,2,3,4,5,6]}};
+function carregar(){try{const r=localStorage.getItem(CHAVE);if(r){const d=JSON.parse(r);db={...db,...d};db.config={...db.config,...(d.config||{})}}}catch(e){}}
+function salvar(){try{localStorage.setItem(CHAVE,JSON.stringify(db))}catch(e){toast('Falha ao salvar. Memória cheia?')}}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+
+/* =========================================================
+   UTILITÁRIOS
+========================================================= */
+const DSEM=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const MESES=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const deIso=s=>{const[a,m,d]=s.split('-').map(Number);return new Date(a,m-1,d)};
+const brData=s=>{const d=deIso(s);return DSEM[d.getDay()]+', '+String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear()};
+const min=h=>{const[a,b]=h.split(':').map(Number);return a*60+b};
+const hhmm=m=>{m=((m%1440)+1440)%1440;return String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0')};
+const moeda=v=>'R$ '+(Number(v)||0).toFixed(2).replace('.',',');
+const numero=v=>Number(String(v||'').replace(/\./g,'').replace(',','.'))||0;
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._x);t._x=setTimeout(()=>t.classList.remove('on'),2600)}
+function abrir(id){document.getElementById(id).classList.add('on');fab(false)}
+function fechar(id){document.getElementById(id).classList.remove('on')}
+
+/* =========================================================
+   AGENDA — TIMELINE
+========================================================= */
+let dataSel=iso(new Date()), refSemana=new Date();
+const PXM=1.5;
+
+function render(){
+  document.getElementById('nomeProf').textContent=db.config.prof||'Atendimento';
+  renderSemana(); renderGrade();
+}
+function renderSemana(){
+  const base=deIso(dataSel), ini=new Date(base); ini.setDate(base.getDate()-base.getDay());
+  let h='';
+  for(let i=0;i<7;i++){
+    const d=new Date(ini); d.setDate(ini.getDate()+i);
+    const s=iso(d), hoje=s===iso(new Date()), sel=s===dataSel;
+    const tem=db.ags.some(a=>a.data===s&&a.status!=='cancelado');
+    h+=`<button class="dia${sel?' sel':''}${hoje?' hoje':''}" onclick="irData('${s}')">
+      <div class="dsem">${DSEM[d.getDay()]}</div><div class="dnum num">${String(d.getDate()).padStart(2,'0')}</div>
+      ${tem?'<span class="pt"></span>':''}</button>`;
+  }
+  document.getElementById('semana').innerHTML=h;
+  const d=deIso(dataSel);
+  document.getElementById('dataLonga').textContent=
+    (dataSel===iso(new Date())?'Hoje • ':'')+DSEM[d.getDay()]+', '+d.getDate()+' de '+MESES[d.getMonth()]+' de '+d.getFullYear();
+}
+function irData(s){dataSel=s;render()}
+function irHoje(){dataSel=iso(new Date());render();window.scrollTo({top:0,behavior:'smooth'})}
+
+function renderGrade(){
+  const g=document.getElementById('grade');
+  const lista=db.ags.filter(a=>a.data===dataSel).sort((a,b)=>min(a.hora)-min(b.hora));
+  let ini=min(db.config.ini), fim=min(db.config.fim);
+  lista.forEach(a=>{ini=Math.min(ini,min(a.hora)-30); fim=Math.max(fim,min(a.hora)+a.dur+30)});
+  ini=Math.max(0,Math.floor(ini/60)*60); fim=Math.min(1440,Math.ceil(fim/60)*60);
+  const alt=(fim-ini)*PXM;
+  let h=`<div style="position:relative;height:${alt}px">`;
+  for(let m=ini;m<=fim;m+=30){
+    const y=(m-ini)*PXM, cheia=m%60===0;
+    h+=`<div class="hora-l${cheia?'':' meia'}" style="top:${y}px"></div>`;
+    if(cheia)h+=`<div class="hora-t num" style="top:${y}px">${hhmm(m)}</div>`;
+  }
+  const agora=new Date();
+  if(dataSel===iso(agora)){
+    const m=agora.getHours()*60+agora.getMinutes();
+    if(m>=ini&&m<=fim)h+=`<div class="agora" style="top:${(m-ini)*PXM}px"></div>`;
+  }
+  h+='<div class="pista">';
+  lista.forEach(a=>{
+    const top=(min(a.hora)-ini)*PXM, alt2=Math.max(34,a.dur*PXM-3);
+    const cli=nomeCliente(a), serv=(a.servicos||[]).map(s=>s.nome).join(', ');
+    const cls=a.tipo==='bloqueio'?'bloqueio':(a.status==='concluido'?'concluido':(a.status==='cancelado'?'cancelado':''));
+    h+=`<div class="bloco ${cls}" style="top:${top}px;height:${alt2}px" onclick="editarAg('${a.id}')">
+      <b>${esc(a.tipo==='bloqueio'?(a.obs||'Bloqueado'):cli)}</b>
+      <span class="num">${a.hora} – ${hhmm(min(a.hora)+a.dur)}${serv?' • '+esc(serv):''}</span></div>`;
+  });
+  h+='</div></div>';
+  g.innerHTML=h;
+  document.getElementById('vazio').style.display=lista.length?'none':'block';
+}
+function nomeCliente(a){
+  if(a.clienteId){const c=db.clientes.find(c=>c.id===a.clienteId); if(c)return c.nome}
+  return a.clienteNome||'Sem cliente';
+}
+
+/* =========================================================
+   CALENDÁRIO — MÊS E ANO
+========================================================= */
+let calMes=new Date().getMonth(), calAno=new Date().getFullYear(), modoAno=false;
+
+function abrirCal(){
+  const d=deIso(dataSel); calMes=d.getMonth(); calAno=d.getFullYear();
+  modoAno=false; desenharCal(); abrir('fCal');
+}
+function alternarCal(){modoAno=!modoAno;desenharCal()}
+function passoCal(n){
+  if(modoAno){calAno+=n}
+  else{calMes+=n; if(calMes>11){calMes=0;calAno++} if(calMes<0){calMes=11;calAno--}}
+  desenharCal();
+}
+function agsDoDia(s){return db.ags.filter(a=>a.data===s&&a.status!=='cancelado')}
+
+function desenharCal(){
+  document.getElementById('calMes').style.display=modoAno?'none':'block';
+  document.getElementById('calAno').style.display=modoAno?'block':'none';
+  document.getElementById('calAlternar').textContent=modoAno?'Mês':'Ano';
+  document.getElementById('calTitulo').textContent=modoAno?'Ano '+calAno:'Calendário';
+  document.getElementById('calRotulo').textContent=modoAno?calAno:MESES[calMes]+' '+calAno;
+  modoAno?desenharAno():desenharMes();
+}
+
+function desenharMes(){
+  const prim=new Date(calAno,calMes,1).getDay(), qtd=new Date(calAno,calMes+1,0).getDate();
+  const hoje=iso(new Date());
+  let h=DSEM.map(d=>`<div class="cab">${d}</div>`).join('');
+  for(let i=0;i<prim;i++)h+='<div></div>';
+  let totalAgs=0, faturamento=0;
+  for(let d=1;d<=qtd;d++){
+    const s=iso(new Date(calAno,calMes,d));
+    const l=agsDoDia(s), n=l.length;
+    totalAgs+=n; faturamento+=l.reduce((t,a)=>t+(a.servicos||[]).reduce((x,y)=>x+y.preco,0),0);
+    const trabalha=db.config.dias.includes(new Date(calAno,calMes,d).getDay());
+    const pts=n?'<div class="pts">'+'<i></i>'.repeat(Math.min(n,3))+'</div>':'<div class="pts"></div>';
+    h+=`<button class="dia-cal${trabalha?'':' fora'}${s===hoje?' hoje':''}${s===dataSel?' sel':''}"
+      onclick="escolherDia('${s}')"><span>${d}</span>${pts}${n>3?`<span class="qtd">${n}</span>`:''}</button>`;
+  }
+  document.getElementById('gdCal').innerHTML=h;
+  document.getElementById('resumoMes').innerHTML=totalAgs
+    ? `<div class="total"><span>${totalAgs} atendimento${totalAgs===1?'':'s'} em ${MESES[calMes]}</span><b class="num">${moeda(faturamento)}</b></div>`
+    : '<p class="dica" style="text-align:center;margin-top:14px">Nenhum atendimento neste mês.</p>';
+}
+
+function desenharAno(){
+  const hoje=new Date();
+  let h='';
+  for(let m=0;m<12;m++){
+    const qtd=new Date(calAno,m+1,0).getDate();
+    let n=0;
+    for(let d=1;d<=qtd;d++)n+=agsDoDia(iso(new Date(calAno,m,d))).length;
+    const atual=(m===hoje.getMonth()&&calAno===hoje.getFullYear());
+    h+=`<button class="mini-mes${atual?' atual':''}" onclick="irMes(${m})">
+      <b>${MESES[m].slice(0,3)}</b>
+      <div class="barra-q"><span style="width:${Math.min(100,n*4)}%"></span></div>
+      <small>${n?n+(n===1?' atend.':' atends.'):'livre'}</small></button>`;
+  }
+  document.getElementById('gdAno').innerHTML=h;
+}
+function irMes(m){calMes=m;modoAno=false;desenharCal()}
+function escolherDia(s){dataSel=s;render();fechar('fCal');window.scrollTo({top:0,behavior:'smooth'})}
+
+/* =========================================================
+   FAB
+========================================================= */
+function fab(f){
+  const a=document.getElementById('fabArea'), on=f===undefined?!a.classList.contains('on'):f;
+  a.classList.toggle('on',on);
+  document.getElementById('fabBtn').classList.toggle('aberto',on);
+  document.getElementById('veu').classList.toggle('on',on);
+}
+
+/* =========================================================
+   FORMULÁRIO DE AGENDAMENTO
+========================================================= */
+let edit=null, tipoAtual='agendamento', servSel=[], datasMulti=[];
+
+function novo(tipo){
+  edit=null; servSel=[]; datasMulti=[];
+  const agora=new Date(); let m=Math.ceil((agora.getHours()*60+agora.getMinutes())/5)*5;
+  document.getElementById('agData').value=dataSel;
+  document.getElementById('agHora').value=hhmm(m);
+  ['agCliente','agTel','agServ','agObs','agCusto'].forEach(i=>document.getElementById(i).value='');
+  delete document.getElementById('agCliente').dataset.id;
+  document.getElementById('sugC').innerHTML='';document.getElementById('sugS').innerHTML='';
+  document.getElementById('agDur').value='60';
+  document.getElementById('agRep').value='0';
+  document.getElementById('agLemb').value='';
+  document.getElementById('agStatus').value='agendado';
+  document.getElementById('btnExcluir').style.display='none';
+  document.getElementById('extra').style.display='none';
+  document.getElementById('btnMais').textContent='Mais campos (observação, custos…)';
+  setTipo(tipo); chips(); calcFim(); abrir('fAg');
+}
+function editarAg(id){
+  const a=db.ags.find(x=>x.id===id); if(!a)return;
+  edit=id; servSel=JSON.parse(JSON.stringify(a.servicos||[])); datasMulti=[];
+  document.getElementById('agData').value=a.data;
+  document.getElementById('agHora').value=a.hora;
+  document.getElementById('agDur').value=a.dur;
+  document.getElementById('agCliente').value=nomeCliente(a)==='Sem cliente'?'':nomeCliente(a);
+  if(a.clienteId)document.getElementById('agCliente').dataset.id=a.clienteId; else delete document.getElementById('agCliente').dataset.id;
+  document.getElementById('agTel').value=a.tel||'';
+  document.getElementById('agObs').value=a.obs||'';
+  document.getElementById('agCusto').value=a.custo||'';
+  document.getElementById('agLemb').value=a.lembrete==null?'':a.lembrete;
+  document.getElementById('agStatus').value=a.status||'agendado';
+  document.getElementById('agRep').value='0';
+  document.getElementById('agRepQtd').style.display='none';
+  document.getElementById('btnExcluir').style.display='block';
+  document.getElementById('extra').style.display='block';
+  setTipo(a.tipo); chips(); calcFim(); abrir('fAg');
+}
+function setTipo(t){
+  tipoAtual=t;
+  document.querySelectorAll('#segTipo button').forEach((b,i)=>b.classList.toggle('on',(i===0)===(t==='agendamento')));
+  const ag=t==='agendamento';
+  document.getElementById('areaCliente').style.display=ag?'block':'none';
+  document.getElementById('areaServico').style.display=ag?'block':'none';
+  document.getElementById('tituloAg').textContent=ag?'Agendamento':'Bloqueio de horário';
+  if(!ag){document.getElementById('extra').style.display='block';document.getElementById('agObs').placeholder='Motivo do bloqueio (ex.: almoço, consulta)'}
+}
+function maisCampos(){
+  const e=document.getElementById('extra'), on=e.style.display==='none';
+  e.style.display=on?'block':'none';
+  document.getElementById('btnMais').textContent=on?'Menos campos':'Mais campos (observação, custos…)';
+}
+function calcFim(){
+  const h=document.getElementById('agHora').value||'00:00';
+  const d=Number(document.getElementById('agDur').value);
+  document.getElementById('janela').innerHTML='<b class="num">'+h+' – '+hhmm(min(h)+d)+'</b> · '+conflitoTexto();
+}
+function conflitoTexto(){
+  const c=conflitos(document.getElementById('agData').value,document.getElementById('agHora').value,Number(document.getElementById('agDur').value),edit);
+  return c.length?'<span style="color:var(--vermelho)">conflita com '+esc(nomeCliente(c[0]))+' às '+c[0].hora+'</span>':'horário livre';
+}
+function conflitos(data,hora,dur,ignorar){
+  const i=min(hora), f=i+dur;
+  return db.ags.filter(a=>a.data===data&&a.id!==ignorar&&a.status!=='cancelado'&&min(a.hora)<f&&min(a.hora)+a.dur>i);
+}
+
+/* --- sugestões --- */
+function sugCliente(){
+  const q=document.getElementById('agCliente').value.trim().toLowerCase(), box=document.getElementById('sugC');
+  let l=db.clientes.filter(c=>c.nome.toLowerCase().includes(q)).slice(0,6);
+  if(!q&&!l.length){box.innerHTML='';return}
+  let h=l.map(c=>`<div onclick="escolherCliente('${c.id}')">${esc(c.nome)}${c.tel?' · <span style="color:var(--cinza)">'+esc(c.tel)+'</span>':''}</div>`).join('');
+  if(q&&!l.some(c=>c.nome.toLowerCase()===q))h+=`<div class="add" onclick="criarClienteRapido()">+ Cadastrar “${esc(document.getElementById('agCliente').value.trim())}”</div>`;
+  box.innerHTML=h?'<div class="sug">'+h+'</div>':'';
+}
+function escolherCliente(id){
+  const c=db.clientes.find(x=>x.id===id); if(!c)return;
+  document.getElementById('agCliente').value=c.nome;
+  document.getElementById('agTel').value=c.tel||'';
+  document.getElementById('agCliente').dataset.id=id;
+  document.getElementById('sugC').innerHTML='';
+}
+function criarClienteRapido(){
+  const nome=document.getElementById('agCliente').value.trim(); if(!nome)return;
+  const c={id:uid(),nome,tel:document.getElementById('agTel').value.trim(),aniv:'',obs:''};
+  db.clientes.push(c); salvar(); escolherCliente(c.id); toast('Cliente cadastrado');
+}
+function sugServico(){
+  const q=document.getElementById('agServ').value.trim().toLowerCase(), box=document.getElementById('sugS');
+  let l=db.servicos.filter(s=>s.nome.toLowerCase().includes(q)).slice(0,6);
+  let h=l.map(s=>`<div onclick="addServico('${s.id}')">${esc(s.nome)} · <span style="color:var(--roxo)">${moeda(s.preco)}</span></div>`).join('');
+  if(q&&!l.some(s=>s.nome.toLowerCase()===q))h+=`<div class="add" onclick="addServicoAvulso()">+ Adicionar “${esc(document.getElementById('agServ').value.trim())}” como item</div>`;
+  box.innerHTML=h?'<div class="sug">'+h+'</div>':'';
+}
+function addServico(id){
+  const s=db.servicos.find(x=>x.id===id); if(!s)return;
+  servSel.push({nome:s.nome,preco:Number(s.preco)||0});
+  if(servSel.length===1&&s.dur)document.getElementById('agDur').value=String(s.dur);
+  document.getElementById('agServ').value=''; document.getElementById('sugS').innerHTML=''; chips(); calcFim();
+}
+function addServicoAvulso(){
+  const nome=document.getElementById('agServ').value.trim(); if(!nome)return;
+  const p=prompt('Preço de "'+nome+'" (R$):','0');
+  servSel.push({nome,preco:numero(p)});
+  document.getElementById('agServ').value=''; document.getElementById('sugS').innerHTML=''; chips();
+}
+function chips(){
+  document.getElementById('chipsServ').innerHTML=servSel.map((s,i)=>
+    `<span class="chip">${esc(s.nome)} <b class="num">${moeda(s.preco)}</b><button onclick="remServico(${i})">×</button></span>`).join('');
+  document.getElementById('agTotal').textContent=moeda(servSel.reduce((t,s)=>t+(Number(s.preco)||0),0));
+}
+function remServico(i){servSel.splice(i,1);chips()}
+
+/* --- salvar --- */
+document.getElementById('agRep').addEventListener('change',e=>{
+  document.getElementById('agRepQtd').style.display=e.target.value==='0'?'none':'block';
+});
+function montarAg(data){
+  const nome=document.getElementById('agCliente').value.trim();
+  let cid=document.getElementById('agCliente').dataset.id||'';
+  const c=db.clientes.find(x=>x.id===cid);
+  if(!c||c.nome!==nome)cid=(db.clientes.find(x=>x.nome.toLowerCase()===nome.toLowerCase())||{}).id||'';
+  const lb=document.getElementById('agLemb').value;
+  return {
+    id:uid(), tipo:tipoAtual, data,
+    hora:document.getElementById('agHora').value,
+    dur:Number(document.getElementById('agDur').value),
+    clienteId:cid, clienteNome:nome, tel:document.getElementById('agTel').value.trim(),
+    servicos:tipoAtual==='agendamento'?servSel.slice():[],
+    obs:document.getElementById('agObs').value.trim(),
+    custo:numero(document.getElementById('agCusto').value),
+    lembrete:lb===''?null:Number(lb),
+    status:document.getElementById('agStatus').value, avisado:false
+  };
+}
+function validar(){
+  if(!document.getElementById('agData').value||!document.getElementById('agHora').value){toast('Informe data e horário');return false}
+  if(tipoAtual==='agendamento'&&!document.getElementById('agCliente').value.trim()){toast('Informe o cliente');return false}
+  return true;
+}
+function salvarAg(){
+  if(!validar())return;
+  const data=document.getElementById('agData').value;
+  const base=montarAg(data);
+  const c=conflitos(data,base.hora,base.dur,edit);
+  if(c.length&&!confirm('Esse horário já tem "'+nomeCliente(c[0])+'" às '+c[0].hora+'. Salvar mesmo assim?'))return;
+  if(edit){
+    const i=db.ags.findIndex(a=>a.id===edit);
+    db.ags[i]={...db.ags[i],...base,id:edit,avisado:db.ags[i].avisado};
+  }else{
+    db.ags.push(base);
+    const rep=Number(document.getElementById('agRep').value);
+    if(rep){
+      const qtd=Math.max(2,Math.min(52,Number(document.getElementById('agRepQtd').value)||4));
+      const passo={1:7,2:14,4:1}[rep];
+      for(let k=1;k<qtd;k++){
+        const d=deIso(data);
+        if(rep===3)d.setMonth(d.getMonth()+k); else d.setDate(d.getDate()+passo*k);
+        db.ags.push({...base,id:uid(),data:iso(d),avisado:false});
+      }
+      toast(qtd+' agendamentos criados');
+    }
+  }
+  salvar(); dataSel=data; fechar('fAg'); render();
+  if(!edit&&Number(document.getElementById('agRep').value)===0)toast('Agendamento salvo');
+  if(edit)toast('Alterações salvas');
+}
+function excluirAg(){
+  if(!edit||!confirm('Excluir este item da agenda?'))return;
+  db.ags=db.ags.filter(a=>a.id!==edit); salvar(); fechar('fAg'); render(); toast('Excluído');
+}
+
+/* =========================================================
+   AGENDAMENTO MÚLTIPLO
+========================================================= */
+function abrirMultiplo(){
+  if(!validar())return;
+  const d=deIso(document.getElementById('agData').value);
+  const sm=document.getElementById('mMes'), sa=document.getElementById('mAno');
+  sm.innerHTML=MESES.map((m,i)=>`<option value="${i}">${m}</option>`).join('');
+  const ano=d.getFullYear();
+  sa.innerHTML=[ano-1,ano,ano+1,ano+2].map(a=>`<option value="${a}">${a}</option>`).join('');
+  sm.value=d.getMonth(); sa.value=ano; datasMulti=[];
+  gradeMulti(); abrir('fMulti');
+}
+function gradeMulti(){
+  const mes=Number(document.getElementById('mMes').value), ano=Number(document.getElementById('mAno').value);
+  const prim=new Date(ano,mes,1).getDay(), qtd=new Date(ano,mes+1,0).getDate(), hoje=iso(new Date());
+  let h=DSEM.map(d=>`<div class="cab">${d}</div>`).join('');
+  for(let i=0;i<prim;i++)h+='<div></div>';
+  for(let d=1;d<=qtd;d++){
+    const s=iso(new Date(ano,mes,d));
+    h+=`<button class="${datasMulti.includes(s)?'on':''} ${s<hoje?'off':''}" onclick="toggleData('${s}')">${d}</button>`;
+  }
+  document.getElementById('gdMulti').innerHTML=h;
+  document.getElementById('chipsDatas').innerHTML=datasMulti.sort().map(s=>
+    `<span class="chip num">${s.split('-').reverse().join('/')}<button onclick="toggleData('${s}')">×</button></span>`).join('')
+    ||'<p class="dica">Nenhum dia selecionado ainda.</p>';
+}
+function toggleData(s){
+  const i=datasMulti.indexOf(s);
+  i<0?datasMulti.push(s):datasMulti.splice(i,1);
+  gradeMulti();
+}
+function salvarMulti(){
+  if(!datasMulti.length){toast('Selecione ao menos um dia');return}
+  datasMulti.forEach(d=>db.ags.push({...montarAg(d),id:uid()}));
+  salvar(); toast(datasMulti.length+' agendamentos criados');
+  fechar('fMulti'); fechar('fAg'); render();
+}
+
+/* =========================================================
+   CLIENTES
+========================================================= */
+let editCli=null;
+function listaClientes(){
+  const q=(document.getElementById('buscaCli').value||'').toLowerCase();
+  const l=db.clientes.filter(c=>c.nome.toLowerCase().includes(q)||(c.tel||'').includes(q))
+    .sort((a,b)=>a.nome.localeCompare(b.nome));
+  document.getElementById('listaCli').innerHTML=l.length?l.map(c=>{
+    const n=db.ags.filter(a=>a.clienteId===c.id).length;
+    return `<div class="item" onclick="editarCliente('${c.id}')">
+      <div class="av">${esc(c.nome.trim()[0]||'?').toUpperCase()}</div>
+      <div class="info"><b>${esc(c.nome)}</b><span>${esc(c.tel||'sem telefone')} · ${n} atendimento${n===1?'':'s'}</span></div>
+      <span style="color:var(--cinza)">›</span></div>`}).join('')
+    :'<p class="dica">Nenhum cliente cadastrado. Toque em “Novo”.</p>';
+}
+function editarCliente(id){
+  editCli=id||null;
+  const c=db.clientes.find(x=>x.id===id)||{nome:'',tel:'',aniv:'',obs:''};
+  document.getElementById('cNome').value=c.nome; document.getElementById('cTel').value=c.tel||'';
+  document.getElementById('cAniv').value=c.aniv||''; document.getElementById('cObs').value=c.obs||'';
+  document.getElementById('tCli').textContent=id?'Editar cliente':'Novo cliente';
+  document.getElementById('delCli').style.display=id?'block':'none';
+  const hist=id?db.ags.filter(a=>a.clienteId===id).sort((a,b)=>b.data.localeCompare(a.data)).slice(0,20):[];
+  document.getElementById('histCli').innerHTML=hist.length?
+    '<div class="sec">Histórico</div>'+hist.map(a=>`<div class="item"><div class="info">
+      <b class="num">${brData(a.data)} · ${a.hora}</b><span>${esc((a.servicos||[]).map(s=>s.nome).join(', ')||'—')}</span></div>
+      <span class="val num">${moeda((a.servicos||[]).reduce((t,s)=>t+s.preco,0))}</span></div>`).join(''):'';
+  abrir('fCli');
+}
+function salvarCliente(){
+  const nome=document.getElementById('cNome').value.trim();
+  if(!nome){toast('Informe o nome');return}
+  const dados={nome,tel:document.getElementById('cTel').value.trim(),
+    aniv:document.getElementById('cAniv').value,obs:document.getElementById('cObs').value.trim()};
+  if(editCli){const i=db.clientes.findIndex(c=>c.id===editCli);db.clientes[i]={...db.clientes[i],...dados}}
+  else db.clientes.push({id:uid(),...dados});
+  salvar(); fechar('fCli'); listaClientes(); render(); toast('Cliente salvo');
+}
+function excluirCliente(){
+  if(!editCli||!confirm('Excluir este cliente? Os agendamentos permanecem com o nome digitado.'))return;
+  db.clientes=db.clientes.filter(c=>c.id!==editCli); salvar(); fechar('fCli'); listaClientes(); toast('Cliente excluído');
+}
+
+/* =========================================================
+   SERVIÇOS
+========================================================= */
+let editServ=null;
+function listaServicos(){
+  const l=db.servicos.slice().sort((a,b)=>a.nome.localeCompare(b.nome));
+  document.getElementById('listaServ').innerHTML=l.length?l.map(s=>
+    `<div class="item" onclick="editarServico('${s.id}')">
+      <div class="info"><b>${esc(s.nome)}</b><span>${s.dur} min</span></div>
+      <span class="val num">${moeda(s.preco)}</span></div>`).join('')
+    :'<p class="dica">Cadastre seus serviços para preencher a comanda com um toque.</p>';
+}
+function editarServico(id){
+  editServ=id||null;
+  const s=db.servicos.find(x=>x.id===id)||{nome:'',preco:'',dur:60};
+  document.getElementById('sNome').value=s.nome;
+  document.getElementById('sPreco').value=s.preco===''?'':String(s.preco).replace('.',',');
+  document.getElementById('sDur').value=s.dur||60;
+  document.getElementById('delServ').style.display=id?'block':'none';
+  abrir('fServ');
+}
+function salvarServico(){
+  const nome=document.getElementById('sNome').value.trim();
+  if(!nome){toast('Informe o nome do serviço');return}
+  const dados={nome,preco:numero(document.getElementById('sPreco').value),dur:Number(document.getElementById('sDur').value)};
+  if(editServ){const i=db.servicos.findIndex(x=>x.id===editServ);db.servicos[i]={...db.servicos[i],...dados}}
+  else db.servicos.push({id:uid(),...dados});
+  salvar(); fechar('fServ'); listaServicos(); toast('Serviço salvo');
+}
+function excluirServico(){
+  if(!editServ||!confirm('Excluir este serviço?'))return;
+  db.servicos=db.servicos.filter(s=>s.id!==editServ); salvar(); fechar('fServ'); listaServicos(); toast('Serviço excluído');
+}
+
+/* =========================================================
+   RELATÓRIOS
+========================================================= */
+let relTipo='agendamentos', ultimoRel=[];
+function setRel(t){
+  relTipo=t;
+  document.querySelectorAll('#segRel button').forEach((b,i)=>b.classList.toggle('on',(i===0)===(t==='livres')));
+  const esconder=t==='livres'?'none':'block';
+  ['rotIncluir','rObs','rotCliente','rCliente','rotServico','rServico','rotStatus','rStatus'].forEach(i=>document.getElementById(i).style.display=esconder);
+  document.getElementById('saidaRel').innerHTML='';
+}
+function prepararRel(){
+  const hoje=iso(new Date());
+  if(!document.getElementById('rIni').value)document.getElementById('rIni').value=hoje;
+  if(!document.getElementById('rFim').value){const d=new Date();d.setDate(d.getDate()+30);document.getElementById('rFim').value=iso(d)}
+  document.getElementById('rCliente').innerHTML='<option value="">Todos os clientes</option>'+
+    db.clientes.slice().sort((a,b)=>a.nome.localeCompare(b.nome)).map(c=>`<option value="${c.id}">${esc(c.nome)}</option>`).join('');
+  const nomes=[...new Set([...db.servicos.map(s=>s.nome),...db.ags.flatMap(a=>(a.servicos||[]).map(s=>s.nome))])].sort();
+  document.getElementById('rServico').innerHTML='<option value="">Todos os serviços</option>'+
+    nomes.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');
+  const ano=new Date().getFullYear();
+  document.getElementById('rMes').innerHTML='<option value="">Mês…</option>'+
+    MESES.map((m,i)=>`<option value="${i}">${m}</option>`).join('');
+  document.getElementById('rAno').innerHTML=[ano-2,ano-1,ano,ano+1].map(a=>`<option value="${a}"${a===ano?' selected':''}>${a}</option>`).join('');
+}
+function marcarAtalho(el){
+  document.querySelectorAll('#atalhos button').forEach(b=>b.classList.toggle('on',b===el));
+}
+function defPeriodo(a,b){
+  document.getElementById('rIni').value=iso(a);
+  document.getElementById('rFim').value=iso(b);
+  gerarRel();
+}
+function periodo(tipo,el){
+  marcarAtalho(el);
+  document.getElementById('rMes').value='';
+  const h=new Date(), a=new Date(h), b=new Date(h);
+  if(tipo==='hoje'){}
+  else if(tipo==='semana'){a.setDate(h.getDate()-h.getDay());b.setDate(a.getDate()+6)}
+  else if(tipo==='mes'){a.setDate(1);b.setMonth(h.getMonth()+1,0)}
+  else if(tipo==='passado'){a.setMonth(h.getMonth()-1,1);b.setMonth(h.getMonth(),0)}
+  else if(tipo==='30'){b.setDate(h.getDate()+30)}
+  else if(tipo==='ano'){a.setMonth(0,1);b.setMonth(11,31)}
+  defPeriodo(a,b);
+}
+function periodoMes(){
+  const m=document.getElementById('rMes').value;
+  if(m===''){return}
+  marcarAtalho(null);
+  const ano=Number(document.getElementById('rAno').value);
+  defPeriodo(new Date(ano,Number(m),1), new Date(ano,Number(m)+1,0));
+}
+function diasDoPeriodo(){
+  const a=deIso(document.getElementById('rIni').value), b=deIso(document.getElementById('rFim').value), out=[];
+  for(let d=new Date(a); d<=b; d.setDate(d.getDate()+1))out.push(iso(new Date(d)));
+  return out.slice(0,400);
+}
+function gerarRel(){
+  const ini=document.getElementById('rIni').value, fim=document.getElementById('rFim').value;
+  if(!ini||!fim||fim<ini){toast('Confira o período');return}
+  const cab=`<div class="sec">Período: ${ini.split('-').reverse().join('/')} até ${fim.split('-').reverse().join('/')}</div>`;
+  if(relTipo==='agendamentos'){
+    const cli=document.getElementById('rCliente').value, obs=document.getElementById('rObs').value==='1';
+    const fServ=document.getElementById('rServico').value, fSt=document.getElementById('rStatus').value;
+    const l=db.ags.filter(a=>{
+      if(a.data<ini||a.data>fim)return false;
+      if(cli&&a.clienteId!==cli)return false;
+      if(fServ&&!(a.servicos||[]).some(s=>s.nome===fServ))return false;
+      const st=a.status||'agendado';
+      if(fSt==='ativos'&&st==='cancelado')return false;
+      if(fSt&&fSt!=='ativos'&&st!==fSt)return false;
+      return true;
+    }).sort((a,b)=>(a.data+a.hora).localeCompare(b.data+b.hora));
+    ultimoRel=[['Data','Horário','Cliente','Serviços','Valor','Status','Observação'],
+      ...l.map(a=>[brData(a.data),a.hora+' - '+hhmm(min(a.hora)+a.dur),a.tipo==='bloqueio'?'[BLOQUEIO]':nomeCliente(a),
+        (a.servicos||[]).map(s=>s.nome).join(' + '),((a.servicos||[]).reduce((t,s)=>t+s.preco,0)).toFixed(2),a.status||'agendado',a.obs||''])];
+    const tot=l.filter(a=>a.status!=='cancelado').reduce((t,a)=>t+(a.servicos||[]).reduce((x,s)=>x+s.preco,0),0);
+    document.getElementById('saidaRel').innerHTML=cab+(l.length?
+      `<table class="tabela"><thead><tr><th>Horário</th><th>Cliente</th><th>Serviço(s)</th><th>Valor</th></tr></thead><tbody>`+
+      l.map(a=>`<tr><td class="num"><b>${brData(a.data)}</b><br>${a.hora} - ${hhmm(min(a.hora)+a.dur)}</td>
+        <td>${esc(a.tipo==='bloqueio'?'[Bloqueio]':nomeCliente(a))}<br><span class="badge ${a.status==='concluido'?'b-ok':a.status==='cancelado'?'b-cc':'b-ag'}">${a.status||'agendado'}</span></td>
+        <td>${esc((a.servicos||[]).map(s=>s.nome).join(', ')||'—')}${obs&&a.obs?'<br><span style="color:var(--cinza)">'+esc(a.obs)+'</span>':''}</td>
+        <td class="num">${moeda((a.servicos||[]).reduce((t,s)=>t+s.preco,0))}</td></tr>`).join('')+
+      `</tbody></table><div class="total"><span>${l.length} registro(s) · total previsto</span><b class="num">${moeda(tot)}</b></div>`
+      :'<p class="dica">Nenhum agendamento no período.</p>');
+  }else{
+    const passo=Number(db.config.intervalo), livres=[];
+    diasDoPeriodo().forEach(d=>{
+      if(!db.config.dias.includes(deIso(d).getDay()))return;
+      const ocup=db.ags.filter(a=>a.data===d&&a.status!=='cancelado');
+      const slots=[];
+      for(let m=min(db.config.ini);m+passo<=min(db.config.fim);m+=passo)
+        if(!ocup.some(a=>min(a.hora)<m+passo&&min(a.hora)+a.dur>m))slots.push(hhmm(m));
+      if(slots.length)livres.push([d,slots]);
+    });
+    ultimoRel=[['Data','Horários livres'],...livres.map(([d,s])=>[brData(d),s.join(' ')])];
+    document.getElementById('saidaRel').innerHTML=cab+(livres.length?
+      `<table class="tabela"><thead><tr><th>Dia</th><th>Horários livres</th></tr></thead><tbody>`+
+      livres.map(([d,s])=>`<tr><td class="num" style="white-space:nowrap"><b>${brData(d)}</b></td>
+        <td class="num">${s.join(' · ')}</td></tr>`).join('')+'</tbody></table>'
+      :'<p class="dica">Nenhum horário livre no período.</p>');
+  }
+}
+function baixarCSV(){
+  if(!ultimoRel.length){gerarRel();if(!ultimoRel.length)return}
+  const csv='\uFEFF'+ultimoRel.map(l=>l.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(';')).join('\r\n');
+  baixar(new Blob([csv],{type:'text/csv;charset=utf-8'}),'relatorio-'+relTipo+'-'+iso(new Date())+'.csv');
+}
+function baixar(blob,nome){
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=nome;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),3000);
+  toast('Arquivo gerado');
+}
+
+/* =========================================================
+   LISTA DE ESPERA / ANIVERSÁRIOS / BUSCA
+========================================================= */
+function addEspera(){
+  const n=document.getElementById('eNome').value.trim(); if(!n){toast('Informe o nome');return}
+  db.espera.push({id:uid(),nome:n,tel:document.getElementById('eTel').value.trim(),
+    pref:document.getElementById('ePref').value.trim(),criado:iso(new Date())});
+  salvar(); ['eNome','eTel','ePref'].forEach(i=>document.getElementById(i).value=''); listaEspera(); toast('Adicionado à lista');
+}
+function listaEspera(){
+  document.getElementById('listaEsp').innerHTML=db.espera.length?
+    '<div class="sec">Aguardando vaga</div>'+db.espera.map(e=>`<div class="item">
+      <div class="info"><b>${esc(e.nome)}</b><span>${esc(e.tel||'sem telefone')}${e.pref?' · '+esc(e.pref):''}</span></div>
+      <button class="txt-btn" onclick="chamarEspera('${e.id}')">Agendar</button>
+      <button class="txt-btn" style="color:var(--vermelho)" onclick="remEspera('${e.id}')">×</button></div>`).join('')
+    :'<p class="dica">Ninguém na lista de espera.</p>';
+}
+function chamarEspera(id){
+  const e=db.espera.find(x=>x.id===id); if(!e)return;
+  fechar('fEspera'); novo('agendamento');
+  document.getElementById('agCliente').value=e.nome; document.getElementById('agTel').value=e.tel||'';
+}
+function remEspera(id){db.espera=db.espera.filter(e=>e.id!==id);salvar();listaEspera()}
+function listaAniv(){
+  const l=db.clientes.filter(c=>c.aniv).map(c=>{
+    const [_,m,d]=c.aniv.split('-'); return {...c,md:m+'-'+d};
+  }).sort((a,b)=>a.md.localeCompare(b.md));
+  const hojeMd=iso(new Date()).slice(5);
+  document.getElementById('listaAn').innerHTML=l.length?l.map(c=>
+    `<div class="item"><div class="av">🎂</div><div class="info"><b>${esc(c.nome)}</b>
+      <span class="num">${c.md.split('-').reverse().join('/')}${c.md===hojeMd?' · é hoje!':''}</span></div>
+      ${c.tel?`<a class="txt-btn" href="https://wa.me/55${c.tel.replace(/\D/g,'')}" target="_blank">WhatsApp</a>`:''}</div>`).join('')
+    :'<p class="dica">Preencha o aniversário no cadastro do cliente para vê-los aqui.</p>';
+}
+function buscar(){
+  const q=document.getElementById('bq').value.trim().toLowerCase();
+  if(q.length<2){document.getElementById('resBusca').innerHTML='<p class="dica">Digite ao menos 2 letras.</p>';return}
+  const l=db.ags.filter(a=>(nomeCliente(a)+' '+(a.servicos||[]).map(s=>s.nome).join(' ')+' '+(a.obs||'')).toLowerCase().includes(q))
+    .sort((a,b)=>(b.data+b.hora).localeCompare(a.data+a.hora)).slice(0,40);
+  document.getElementById('resBusca').innerHTML=l.length?l.map(a=>
+    `<div class="item" onclick="fechar('fBusca');dataSel='${a.data}';render();editarAg('${a.id}')">
+      <div class="info"><b>${esc(nomeCliente(a))}</b><span class="num">${brData(a.data)} · ${a.hora}</span></div>
+      <span style="color:var(--cinza)">›</span></div>`).join('')
+    :'<p class="dica">Nada encontrado.</p>';
+}
+
+/* =========================================================
+   CONFIGURAÇÕES
+========================================================= */
+function carregarConfig(){
+  document.getElementById('kProf').value=db.config.prof;
+  document.getElementById('kIni').value=db.config.ini;
+  document.getElementById('kFim').value=db.config.fim;
+  document.getElementById('kLemb').value=db.config.lembrete;
+  document.getElementById('kInt').value=db.config.intervalo;
+  document.getElementById('gdDias').innerHTML=DSEM.map((d,i)=>
+    `<button class="${db.config.dias.includes(i)?'on':''}" onclick="toggleDia(${i})" style="aspect-ratio:auto;padding:11px 0">${d}</button>`).join('');
+  statusNot();
+}
+function toggleDia(i){
+  const p=db.config.dias.indexOf(i); p<0?db.config.dias.push(i):db.config.dias.splice(p,1);
+  carregarConfig();
+}
+function salvarConfig(){
+  db.config.prof=document.getElementById('kProf').value.trim()||'Atendimento';
+  db.config.ini=document.getElementById('kIni').value||'08:00';
+  db.config.fim=document.getElementById('kFim').value||'20:00';
+  db.config.lembrete=Number(document.getElementById('kLemb').value);
+  db.config.intervalo=Number(document.getElementById('kInt').value);
+  salvar(); render(); fechar('fConfig'); toast('Configurações salvas');
+}
+
+/* =========================================================
+   LEMBRETES
+========================================================= */
+function statusNot(){
+  const el=document.getElementById('statusNot');
+  if(!('Notification'in window)){el.style.display='block';el.textContent='Este navegador não envia notificações. Os lembretes aparecem como aviso na tela com o app aberto.';return}
+  el.style.display='block';
+  el.textContent=Notification.permission==='granted'
+    ?'Notificações ativas. Com o app instalado na tela de início, os lembretes chegam mesmo com ele em segundo plano.'
+    :Notification.permission==='denied'
+      ?'Notificações bloqueadas nas permissões do navegador. Libere para receber os lembretes.'
+      :'Notificações ainda não autorizadas.';
+}
+function pedirNotificacao(){
+  if(!('Notification'in window)){toast('Sem suporte neste navegador');return}
+  Notification.requestPermission().then(p=>{statusNot();toast(p==='granted'?'Notificações ativadas':'Permissão não concedida')});
+}
+function checarLembretes(){
+  const agora=new Date(), t=agora.getTime(); let mudou=false;
+  db.ags.forEach(a=>{
+    if(a.avisado||a.status==='cancelado')return;
+    const antes=a.lembrete==null?db.config.lembrete:a.lembrete;
+    if(!antes)return;
+    const inicio=deIso(a.data).getTime()+min(a.hora)*60000;
+    const disparo=inicio-antes*60000;
+    if(t>=disparo&&t<inicio){
+      a.avisado=true; mudou=true;
+      const txt=(a.tipo==='bloqueio'?'Bloqueio':nomeCliente(a))+' às '+a.hora+
+        ((a.servicos||[]).length?' — '+a.servicos.map(s=>s.nome).join(', '):'');
+      if('Notification'in window&&Notification.permission==='granted'){
+        notificar(txt,a.id);
+      }else toast('Lembrete: '+txt);
+    }
+  });
+  if(mudou)salvar();
+  if(dataSel===iso(agora))renderGrade();
+}
+
+/* =========================================================
+   BACKUP
+========================================================= */
+function exportarJSON(){
+  baixar(new Blob([JSON.stringify(db,null,2)],{type:'application/json'}),'backup-agenda-'+iso(new Date())+'.json');
+}
+function importarJSON(inp){
+  const f=inp.files[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{
+    const d=JSON.parse(r.result);
+    if(!d.ags)throw 0;
+    if(!confirm('Substituir os dados atuais pelo backup?'))return;
+    db={...db,...d}; salvar(); render(); toast('Backup restaurado');
+  }catch(e){toast('Arquivo inválido')} inp.value=''};
+  r.readAsText(f);
+}
+function apagarTudo(){
+  if(!confirm('Apagar TODOS os dados da agenda? Isso não pode ser desfeito.'))return;
+  if(!confirm('Tem certeza mesmo? Faça o backup antes.'))return;
+  localStorage.removeItem(CHAVE); location.reload();
+}
+function medirUso(){
+  const b=new Blob([localStorage.getItem(CHAVE)||'']).size;
+  document.getElementById('uso').textContent=
+    `${db.ags.length} agendamentos · ${db.clientes.length} clientes · ${db.servicos.length} serviços · ${(b/1024).toFixed(1)} KB usados.`;
+}
+
+/* =========================================================
+   INÍCIO
+========================================================= */
+carregar();
+if(!db.servicos.length&&!db.ags.length&&!db.clientes.length){
+  db.servicos=[
+    {id:uid(),nome:'Atendimento padrão',preco:0,dur:60},
+    {id:uid(),nome:'Retorno',preco:0,dur:30}
+  ];
+  salvar();
+}
+render(); prepararRel(); setRel('agendamentos'); medirUso();
+checarLembretes();
+setInterval(checarLembretes,30000);
+setInterval(()=>{if(dataSel===iso(new Date()))renderGrade()},60000);
+/* =========================================================
+   PWA — INSTALAÇÃO, OFFLINE E NOTIFICAÇÃO VIA SERVICE WORKER
+========================================================= */
+let swReg=null, promptInstalar=null;
+
+if('serviceWorker'in navigator&&location.protocol!=='file:'){
+  navigator.serviceWorker.register('./sw.js')
+    .then(r=>{swReg=r})
+    .catch(()=>{});
+}
+
+function notificar(texto,id){
+  if(swReg&&swReg.active){
+    swReg.active.postMessage({tipo:'lembrete',texto,id});
+    return;
+  }
+  if(swReg&&swReg.showNotification){
+    swReg.showNotification('Lembrete de atendimento',{body:texto,tag:id,icon:'./icone-192.png'});
+    return;
+  }
+  try{new Notification('Lembrete de atendimento',{body:texto,tag:id,icon:'./icone-192.png'})}
+  catch(e){toast('Lembrete: '+texto)}
+}
+
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault(); promptInstalar=e;
+  document.getElementById('btnInstalar').style.display='block';
+});
+window.addEventListener('appinstalled',()=>{
+  promptInstalar=null;
+  document.getElementById('btnInstalar').style.display='none';
+  toast('Agenda instalada no aparelho');
+});
+function instalar(){
+  if(promptInstalar){promptInstalar.prompt();promptInstalar=null;return}
+  const ios=/iPad|iPhone|iPod/.test(navigator.userAgent);
+  alert(ios
+    ? 'No iPhone: toque no botão Compartilhar do Safari e escolha "Adicionar à Tela de Início".'
+    : 'No menu do navegador (⋮), escolha "Instalar app" ou "Adicionar à tela inicial".');
+}
+function mostrarConexao(){
+  const el=document.getElementById('avisoOffline');
+  if(el)el.style.display=navigator.onLine?'none':'block';
+}
+window.addEventListener('online',mostrarConexao);
+window.addEventListener('offline',mostrarConexao);
+mostrarConexao();
+
+/* mostra o botão de instalar quando o app ainda não está na tela de início */
+if(!matchMedia('(display-mode: standalone)').matches&&!navigator.standalone){
+  const b=document.getElementById('btnInstalar'); if(b)b.style.display='block';
+}
+
+/* pede ao navegador para não descartar os dados salvos */
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
+
+/* atalhos do manifest: ./agenda.html?acao=novo */
+(function(){
+  const acao=new URLSearchParams(location.search).get('acao');
+  if(acao==='novo')setTimeout(()=>novo('agendamento'),300);
+  if(acao==='relatorio')setTimeout(()=>abrir('fRel'),300);
+})();
+
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#areaCliente'))document.getElementById('sugC').innerHTML='';
+  if(!e.target.closest('#areaServico'))document.getElementById('sugS').innerHTML='';
+},true);
+document.getElementById('fDados').addEventListener('transitionend',medirUso);
+window.addEventListener('beforeunload',salvar);
+</script>
+</body>
+</html>
